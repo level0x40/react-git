@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <!-- Background radial gradients -->
+    <radialGradient id="bg-glow" cx="50%" cy="32%" r="50%">
+      <stop offset="0%" stop-color="#2a1060" stop-opacity="0.9"/>
+      <stop offset="30%" stop-color="#1a0a3e" stop-opacity="0.5"/>
+      <stop offset="65%" stop-color="#0d0620" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bg-glow2" cx="50%" cy="28%" r="40%">
+      <stop offset="0%" stop-color="#204080" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- LVL letter gradients (from Inkscape SVG) -->
+    <linearGradient id="lvl-grad-L1" x1="38.9605" y1="50" x2="38.9605" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aaffff"/>
+      <stop offset="0.33" stop-color="#aaffff"/>
+      <stop offset="0.5466" stop-color="#6964ff"/>
+      <stop offset="0.9" stop-color="#8010e1"/>
+      <stop offset="1" stop-color="#ff96ff"/>
+    </linearGradient>
+    <linearGradient id="lvl-grad-V" x1="110" y1="50" x2="110" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aaffff"/>
+      <stop offset="0.33" stop-color="#aaffff"/>
+      <stop offset="0.5466" stop-color="#6964ff"/>
+      <stop offset="0.9" stop-color="#8010e1"/>
+      <stop offset="1" stop-color="#ff96ff"/>
+    </linearGradient>
+    <linearGradient id="lvl-grad-L2" x1="135" y1="50" x2="135" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aaffff"/>
+      <stop offset="0.33" stop-color="#aaffff"/>
+      <stop offset="0.5466" stop-color="#6964ff"/>
+      <stop offset="0.9" stop-color="#8010e1"/>
+      <stop offset="1" stop-color="#ff96ff"/>
+    </linearGradient>
+
+    <!-- LVL drop shadow filters -->
+    <filter id="shadow-L1" style="color-interpolation-filters:sRGB" x="-0.092" y="-0.064" width="1.183" height="1.127">
+      <feFlood result="flood" flood-opacity="1" flood-color="rgb(0,0,0)"/>
+      <feGaussianBlur result="blur" in="SourceGraphic" stdDeviation="1.719"/>
+      <feOffset result="offset" in="blur" dx="0" dy="0"/>
+      <feComposite result="comp1" operator="in" in="flood" in2="offset"/>
+      <feComposite result="comp2" operator="over" in="SourceGraphic" in2="comp1"/>
+    </filter>
+    <filter id="shadow-V" style="color-interpolation-filters:sRGB" x="-0.078" y="-0.072" width="1.156" height="1.144">
+      <feFlood result="flood" flood-opacity="1" flood-color="rgb(0,0,0)"/>
+      <feGaussianBlur result="blur" in="SourceGraphic" stdDeviation="1.953"/>
+      <feOffset result="offset" in="blur" dx="0" dy="0"/>
+      <feComposite result="comp1" operator="in" in="flood" in2="offset"/>
+      <feComposite result="comp2" operator="over" in="SourceGraphic" in2="comp1"/>
+    </filter>
+    <filter id="shadow-L2" style="color-interpolation-filters:sRGB" x="-0.091" y="-0.064" width="1.183" height="1.127">
+      <feFlood result="flood" flood-opacity="1" flood-color="rgb(0,0,0)"/>
+      <feGaussianBlur result="blur" in="SourceGraphic" stdDeviation="1.724"/>
+      <feOffset result="offset" in="blur" dx="0" dy="0"/>
+      <feComposite result="comp1" operator="in" in="flood" in2="offset"/>
+      <feComposite result="comp2" operator="over" in="SourceGraphic" in2="comp1"/>
+    </filter>
+
+    <!-- CRT scanline pattern -->
+    <pattern id="scanlines" width="800" height="4" patternUnits="userSpaceOnUse">
+      <rect width="800" height="2" y="0" fill="transparent"/>
+      <rect width="800" height="2" y="2" fill="rgba(0,0,0,0.55)"/>
+    </pattern>
+
+    <!-- Mask scanlines to LVL letters + 0x40 text -->
+    <mask id="text-mask">
+      <g transform="translate(81.1111, -136.6667) scale(3.111111)">
+        <path d="M 35.000005,49.999999 V 115 H 80.02045 L 72.623904,94.999997 H 55.000005 V 49.999999 Z" fill="white"/>
+        <path d="M 60.000001,49.999998 85.000002,115 115,115 134.7697,49.999997 H 114.76969 L 100,94.999997 80.000001,49.999998 Z" fill="white"/>
+        <path d="m 140.23012,50 19.76988,-10e-7 -12,44.999998 22.91844,-3e-6 V 115 L 120,115 Z" fill="white"/>
+      </g>
+      <use href="#subtitle-0x40" fill="white"/>
+    </mask>
+  </defs>
+
+  <!-- ==================== BACKGROUND ==================== -->
+  <rect width="800" height="500" fill="url(#bg-glow)"/>
+  <rect width="800" height="500" fill="url(#bg-glow2)"/>
+
+  <!-- Horizontal background lines -->
+  <line x1="0" y1="45" x2="800" y2="45" stroke="#4080c0" stroke-width="0.5" opacity="0.1"/>
+  <line x1="75" y1="175" x2="725" y2="175" stroke="#4080c0" stroke-width="0.5" opacity="0.07"/>
+  <line x1="40" y1="260" x2="760" y2="260" stroke="#4080c0" stroke-width="0.5" opacity="0.1"/>
+  <line x1="150" y1="330" x2="650" y2="330" stroke="#4080c0" stroke-width="0.5" opacity="0.06"/>
+  <line x1="0" y1="390" x2="800" y2="390" stroke="#4080c0" stroke-width="0.5" opacity="0.1"/>
+  <line x1="190" y1="440" x2="610" y2="440" stroke="#4080c0" stroke-width="0.5" opacity="0.04"/>
+
+  <!-- ==================== LVL GRAPHIC (inlined paths) ==================== -->
+  <g transform="translate(81.1111, -136.6667) scale(3.111111)">
+    <path
+      style="fill:url(#lvl-grad-L1);filter:url(#shadow-L1)"
+      d="M 35.000005,49.999999 V 115 H 80.02045 L 72.623904,94.999997 H 55.000005 V 49.999999 Z"/>
+    <path
+      style="fill:url(#lvl-grad-V);filter:url(#shadow-V)"
+      d="M 60.000001,49.999998 85.000002,115 115,115 134.7697,49.999997 H 114.76969 L 100,94.999997 80.000001,49.999998 Z"/>
+    <path
+      style="fill:url(#lvl-grad-L2);filter:url(#shadow-L2)"
+      d="m 140.23012,50 19.76988,-10e-7 -12,44.999998 22.91844,-3e-6 V 115 L 120,115 Z"/>
+  </g>
+
+  <!-- ==================== SUBTITLES ==================== -->
+
+  <!-- Decorative lines -->
+  <line x1="140" y1="32" x2="660" y2="32" stroke="#3080b0" stroke-width="0.5" opacity="0.2"/>
+  <line x1="180" y1="226" x2="620" y2="226" stroke="#3080b0" stroke-width="0.5" opacity="0.15"/>
+
+  <!-- "0x40" C64 ROM pixel blocks -->
+  <g id="subtitle-0x40" transform="translate(398, 250) scale(1) translate(-398, -250)">
+  <g>
+    <!-- char "0" -->
+    <rect x="340" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="344" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="348" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="352" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="356" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="336" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="340" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="356" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="360" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="336" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="340" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="352" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="356" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="360" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="336" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="340" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="348" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="356" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="360" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="336" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="340" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="344" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="356" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="360" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="336" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="340" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="356" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="360" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="340" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="344" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="348" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="352" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="356" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <!-- char "x" -->
+    <rect x="368" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="372" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="388" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="392" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="372" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="376" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="384" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="388" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="376" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="380" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="384" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="372" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="376" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="384" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="388" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="368" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="372" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="388" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="392" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <!-- char "4" -->
+    <rect x="416" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="420" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="412" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="416" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="420" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="408" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="416" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="420" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="404" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="416" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="420" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="400" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="404" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="408" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="412" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="416" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="420" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="424" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="416" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="420" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="416" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="420" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <!-- char "0" -->
+    <rect x="436" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="440" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="444" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="448" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="452" y="236" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="432" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="436" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="452" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="456" y="240" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="432" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="436" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="448" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="452" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="456" y="244" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="432" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="436" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="444" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="452" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="456" y="248" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="432" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="436" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="440" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="452" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="456" y="252" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="432" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="436" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="452" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="456" y="256" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="436" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="440" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="444" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="448" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="452" y="260" width="4" height="4" fill="#6ae8a0" shape-rendering="crispEdges"/>
+  </g>
+  </g>
+
+  <!-- Accent line below 0x40 -->
+  <line x1="280" y1="280" x2="520" y2="280" stroke="#6040c0" stroke-width="0.5" opacity="0.2"/>
+
+  <!-- ==================== CRT SCANLINES ==================== -->
+  <!-- CRT scanlines over LVL letters only -->
+  <rect width="800" height="500" fill="url(#scanlines)" opacity="1.0" mask="url(#text-mask)"/>
+</svg>

@@ -1,0 +1,20 @@
+{
+  "name": "@level0x40/react-git-docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "One-page docs site for @level0x40/react-git, deployed to Cloudflare.",
+  "type": "module",
+  "scripts": {
+    "dev": "react-server",
+    "build": "react-server build",
+    "start": "react-server start",
+    "deploy": "react-server build --deploy"
+  },
+  "dependencies": {
+    "@lazarv/react-server": "0.0.0-experimental-675fbba-20260506-52f692e4",
+    "remark-gfm": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

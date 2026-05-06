@@ -1,0 +1,243 @@
+<div className="hero">
+  <h2 className="hero-eyebrow">@level0x40</h2>
+  <h1 className="hero-title">react-git</h1>
+
+  <p className="hero-tagline">
+    A CLI that turns any local Git repository into a static, publishable
+    React UI for browsing source artifacts — commits, refs, trees,
+    blobs, diffs, and contribution heatmaps. Powered by{" "}
+    <a href="https://react-server.dev">@lazarv/react-server</a>.
+  </p>
+</div>
+
+## What it does
+
+`@level0x40/react-git` reads a local Git repository, extracts its source artifacts into a typed manifest, and renders them as a self-contained static site. The output is plain HTML, JSON, and assets — no server, no database, no runtime access to the original repo.
+
+It is a thin orchestration layer over [@lazarv/react-server](https://react-server.dev), an open React Server Components runtime built on Vite. The build pipeline runs the production server with a streaming export hook driving renders, then writes the result to disk. Drop the artifacts on Cloudflare Pages, Netlify, GitHub Pages, S3, or any static host.
+
+## Quick start
+
+Run from inside the repository you want to render — no arguments needed:
+
+```sh
+npx @level0x40/react-git build
+```
+
+The output goes to `./dist` (override with `--out`). Drop it on any static host, or open `dist/index.html` directly.
+
+For iterative work, run the dev server with hot reload:
+
+```sh
+npx @level0x40/react-git dev
+```
+
+Both commands accept an optional path to the repository if you'd rather run them from elsewhere:
+
+```sh
+npx @level0x40/react-git build /path/to/your/repo
+```
+
+## Templates
+
+Six visual styles ship in the box. Pick one with `--template <name>`, or stack multiple — file overrides and config merging both honour CLI order, so the last entry wins.
+
+<ul className="tpl-grid">
+  <li className="tpl-card">
+    <span className="tpl-name">default</span>
+    <span className="tpl-desc">Editorial monospace, terra-cotta accent.</span>
+  </li>
+  <li className="tpl-card">
+    <span className="tpl-name">primer</span>
+    <span className="tpl-desc">GitHub-faithful Primer aesthetic.</span>
+  </li>
+  <li className="tpl-card">
+    <span className="tpl-name">w3c</span>
+    <span className="tpl-desc">W3C technical-report styling, navy accent.</span>
+  </li>
+  <li className="tpl-card">
+    <span className="tpl-name">react-server</span>
+    <span className="tpl-desc">Companion to react-server.dev, gold ramp.</span>
+  </li>
+  <li className="tpl-card">
+    <span className="tpl-name">sketchpad</span>
+    <span className="tpl-desc">Hand-drawn coral-and-teal panel look.</span>
+  </li>
+  <li className="tpl-card">
+    <span className="tpl-name">tui</span>
+    <span className="tpl-desc">Terminal aesthetic, ANSI palette.</span>
+  </li>
+</ul>
+
+```sh
+# Stack two templates: a built-in for the chrome,
+# a local folder for your project-specific overrides.
+npx @level0x40/react-git build . \
+  --template primer \
+  --template ./my-overlay
+```
+
+## Modes
+
+Two extraction strategies, toggled with `--live`:
+
+- **manifest** _(default)_ — Pre-extract every commit, ref, tree, and blob into JSON shards under `.react-git/cache/`. Renders read from those shards. Best for production builds: deterministic, no git access at render time, cleanly cacheable.
+- **live** — Pass `--live` to skip extraction and query Git directly for every render. Best for development against a moving repo, or for one-off previews.
+
+> `--mode` is **not** the mode toggle — it's forwarded to `@lazarv/react-server` (production/development build mode). Use `--live` to flip extraction strategy.
+
+## CLI reference
+
+Every flag below is also listed in `react-git --help`. Flags marked **passthrough** are forwarded to `@lazarv/react-server` verbatim — most of them accept `--no-<flag>` to opt out (e.g. `--no-compression`, `--no-minify`).
+
+### `react-git build [repo] [options]`
+
+Generates the static site to the `--out` directory.
+
+#### Common options (build + dev)
+
+| Flag                      | Default            | Description                                                                                                                                                           |
+| ------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--template <name\|dir>`  | `default`          | Built-in theme name or path to a custom template directory. Repeat or comma-separate to stack — later entry wins both for file overrides and config-merge precedence. |
+| `--max-commits <n>`       | `50`               | Cap on commits stored in per-ref `/log` shards. Does **not** cap the contribution calendar — that uses its own uncapped 53-week shard.                                |
+| `--include-ref <pattern>` | every branch + tag | Refs to extract. Repeat or comma-separate. Patterns support `*` wildcards (`release/*`, `v1.*`).                                                                      |
+| `--exclude-ref <pattern>` | —                  | Refs to drop after `--include-ref`. Wins on conflict.                                                                                                                 |
+| `--browse-ref <name\|*>`  | HEAD only          | Refs whose deep file paths get prerendered for `/tree/<ref>/<path...>`. `*` opts in to every extracted ref. Trade-off: more refs = more HTML files = larger deploy.   |
+| `--live`                  | off                | Skip extraction; query Git directly per render. Best for dev against a moving repo.                                                                                   |
+| `--force`                 | off                | Wipe the react-git extraction + build caches before this run. Not forwarded.                                                                                          |
+
+#### Build-only options
+
+| Flag           | Default  | Description                                                                                 |
+| -------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `--out <path>` | `./dist` | Output directory for the static site. The directory is wiped and re-emitted on every build. |
+
+#### Build passthrough — `@lazarv/react-server`
+
+| Flag                                 | Description                                                                                                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--deploy [adapter]`                 | Build for + deploy to a target. The optional value names the adapter; otherwise the configured adapter is used.                                                                                  |
+| `--adapter <name>`                   | Deployment adapter — `cloudflare`, `vercel`, `netlify`, `aws`, `azure`, `bun`, `deno`, `docker`, `firebase`, `singlefile`. See the [react-server adapter docs](https://react-server.dev/deploy). |
+| `--export`                           | Force static export on. By default the static export runs whenever at least one route declares a `.static.*` source.                                                                             |
+| `--export-concurrency <n>`           | Worker pool size for the static export. Defaults to a CPU-derived value.                                                                                                                         |
+| `--compression` / `--no-compression` | Emit `.gz` and `.br` sidecars next to every static asset. Default: on.                                                                                                                           |
+| `--minify` / `--no-minify`           | Minify HTML/CSS/JS output. Default: on.                                                                                                                                                          |
+| `--sourcemap <mode>`                 | Source-map mode (`inline`, `hidden`, `external`).                                                                                                                                                |
+| `--edge`                             | Build for an edge runtime target.                                                                                                                                                                |
+| `--mode <production\|development>`   | Forwarded build mode. Default: `production`.                                                                                                                                                     |
+| `--silent`                           | Suppress non-essential build output.                                                                                                                                                             |
+| `--verbose`                          | Print extra build diagnostics.                                                                                                                                                                   |
+| `--no-check` / `--no-validation`     | Skip schema/route validation at build time.                                                                                                                                                      |
+| `--no-color`                         | Disable ANSI colour codes.                                                                                                                                                                       |
+| `-e, --eval <code>`                  | Inline config snippet evaluated by `@lazarv/react-server`.                                                                                                                                       |
+
+### `react-git dev [repo] [options]`
+
+Starts a hot-reloading dev server on `http://localhost:3000`.
+
+#### Dev-only options
+
+| Flag         | Default     | Description                                                      |
+| ------------ | ----------- | ---------------------------------------------------------------- |
+| `--port <n>` | `3000`      | Dev server port.                                                 |
+| `--host <h>` | `localhost` | Dev server host. Use `0.0.0.0` to expose on the LAN.             |
+| `--open`     | off         | Open the dev URL in the default browser.                         |
+| `--https`    | off         | Serve over HTTPS with an auto-generated self-signed certificate. |
+
+#### Dev passthrough — `@lazarv/react-server`
+
+| Flag                               | Description                                                 |
+| ---------------------------------- | ----------------------------------------------------------- |
+| `--cors`                           | Enable CORS on the dev server.                              |
+| `--origin <url>`                   | Override the public origin used for absolute URLs.          |
+| `--trust-proxy`                    | Honour `X-Forwarded-*` headers when running behind a proxy. |
+| `--clear-screen`                   | Clear the terminal between dev events.                      |
+| `--watch`                          | Force watch mode (already on by default for `dev`).         |
+| `--devtools`                       | Enable react-server's in-page devtools panel.               |
+| `--inspect`                        | Enable Node's V8 inspector.                                 |
+| `-n, --name <name>`                | Project name shown in the devtools UI.                      |
+| `--mode <production\|development>` | Forwarded dev-server mode. Default: `development`.          |
+| `--no-check` / `--no-validation`   | Skip schema/route validation.                               |
+| `--no-color`                       | Disable ANSI colour codes.                                  |
+| `-e, --eval <code>`                | Inline config snippet evaluated by `@lazarv/react-server`.  |
+
+### Examples
+
+```sh
+# Smallest invocation — build cwd to ./dist with the default template.
+react-git build
+
+# Build a sibling repo to a specific output dir.
+react-git build /path/to/repo --out ./site
+
+# W3C theme, no compression sidecars, smaller deploy.
+react-git build --template w3c --no-compression
+
+# Filter the refs that get extracted.
+react-git build --include-ref 'release/*' --exclude-ref 'wip/*'
+
+# Browse-tree pages for every extracted ref + larger /log per ref.
+react-git build --browse-ref '*' --max-commits 200
+
+# Build + deploy in one step (passthrough to react-server).
+react-git build --deploy --adapter cloudflare
+
+# Dev server bound to a non-default port + auto-open.
+react-git dev --port 4000 --open
+
+# Dev server in live mode, exposed on the LAN.
+react-git dev --live --host 0.0.0.0
+```
+
+## Data layer
+
+The Git data extraction is a separate concern from rendering. The same code that powers the static site is exposed as a standalone library through three subpath exports — usable from any Node host, with no `@lazarv/react-server` runtime needed.
+
+| Subpath                             | Purpose                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `@level0x40/react-git/source`       | Stable function surface — `getProject`, `listCommits`, `getDiff`, `getBlob`, … |
+| `@level0x40/react-git/source/build` | Same content under its build-time alias.                                       |
+| `@level0x40/react-git/source/types` | JSDoc typedefs (`SourceCommit`, `SourceTree`, `SourceDiff`, …).                |
+
+```js
+import { listCommits, getDiff } from "@level0x40/react-git/source";
+/** @typedef {import("@level0x40/react-git/source/types").SourceCommit} Commit */
+
+const commits = await listCommits();
+const diff = await getDiff(commits[0].sha);
+```
+
+The public functions carry `"use cache"` directives that the `@lazarv/react-server` runtime interprets for per-request deduplication. Outside that runtime the directives are inert string statements — calls work in any Node host and just don't dedupe automatically. Wrap with your own cache for hot paths.
+
+## Configuration
+
+Configuration comes from three layered sources, merged in this order (later wins):
+
+1. The base config baked into `@level0x40/react-git`.
+2. Each `--template <dir>`'s `react-server.config.{mjs,js,ts}`, in CLI order.
+3. CLI flags.
+
+Most users never write a `react-server.config.*` file directly — the built-in templates supply theirs. Drop a custom one inside a `--template <dir>` overlay only when you need to tweak Vite plugins, virtual routes, or other react-server config knobs.
+
+## Deployment
+
+The build emits a self-contained directory. For Cloudflare Pages, Netlify, S3 + CloudFront, GitHub Pages, etc., the artifact is plain static files — copy `./dist` (or whatever `--out` points at) to the host.
+
+For platforms `@lazarv/react-server` knows how to deploy directly, use `--deploy`:
+
+```sh
+react-git build --deploy --adapter cloudflare
+react-git build --deploy --adapter vercel
+react-git build --deploy --adapter netlify
+```
+
+The flag is forwarded to `@lazarv/react-server`, which handles the platform's API/CLI interactions itself — no separate `wrangler` / `vercel` / `netlify` invocation needed.
+
+## Conflicts and gotchas
+
+| Situation                              | Resolution                                                                                                                                                                               |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--force`                              | Owned by react-git (cache wipe). **Not** forwarded to `@lazarv/react-server`.                                                                                                            |
+| `--mode`                               | Forwarded as-is (`production`/`development`). Pass `--live` to flip extraction strategy.                                                                                                 |
+| `--out` vs `--outDir`                  | `--out` is react-git's user-facing output dir. `--outDir` is the react-server-internal staging dir; react-git overrides it unconditionally so the incremental build dance keeps working. |
+| Building from `node_modules` via `npx` | Works the same as a workspace install. Earlier path-shape bugs in `@lazarv/react-server`'s chunking + file-router codegen were fixed in `0.0.0-experimental-675fbba` and later.          |

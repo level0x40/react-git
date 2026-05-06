@@ -1,0 +1,6 @@
+{
+  "name": "sketchpad",
+  "label": "Sketchpad",
+  "description": "Coral + teal on warm cream paper. Hand-marker dashed dividers, rounded sans, faint horizontal-rule underlay so the page reads as graph paper. FileIcon is overridden with emoji glyphs — first built-in template that ships a JSX component override (alongside its CSS), demonstrating the resolveVirtual fallthrough through both file kinds at once.",
+  "version": "0.0.0"
+}

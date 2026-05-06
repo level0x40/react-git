@@ -1,0 +1,995 @@
+/* w3c — plain document-oriented styling, in the spirit of the
+ * pages on www.w3.org and the canonical W3C Technical Report
+ * stylesheet (https://www.w3.org/StyleSheets/TR/).
+ *
+ * Reference points kept in mind while writing this:
+ *
+ *   - Body in Times-equivalent serif, 16px, line-height 1.5.
+ *   - Default-blue underlined links (#0000EE), purple visited
+ *     (#551A8B). Reading these colors instantly signals "document",
+ *     the same way Wikipedia or the W3C TR documents read.
+ *   - Headings in dark navy, with a thin grey rule under H1/H2 — a
+ *     direct echo of the TR stylesheet.
+ *   - Notes / inline asides on a pale yellow band (#fffbe6, with
+ *     a #e7c000 left rule). Used for `.rg-static-notice` here.
+ *   - Definition lists for metadata (commit author, dates, sha) —
+ *     <dt>/<dd> are the native W3C way to tabulate small fact pairs.
+ *   - Modest left/right body padding (~2em on the sides), max-width
+ *     so lines stay around 70-80 chars at the chosen font size.
+ *
+ * Things explicitly NOT borrowed from the TR stylesheet:
+ *
+ *   - Section numbering. The repo browser is not a numbered spec.
+ *   - The reddish-brown title color used by older TR drafts; sticking
+ *     to plain dark navy keeps the page from looking date-stamped.
+ *   - The wide outdented headings used for bibliographic refs.
+ *
+ * Decoration switched off entirely:
+ *
+ *   - Default theme's ambient grid background divs.
+ *   - The default statusbar's fixed-bottom positioning (left in
+ *     normal flow as a footer-ish strip).
+ *   - The pulsing "live" dot and blinking cursor block.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Pin to a light scheme so user-agent dark-mode preferences don't
+   * invert form controls and scrollbars and break the document look. */
+  color-scheme: light;
+  background: #fff;
+  color: #111;
+  /* Times serif everywhere a serif is expected — same family the
+   * W3C site has used for body copy across most of its history. */
+  font-family: "Times New Roman", Times, serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  /* Modest gutters — wide enough that text doesn't crowd the edge. */
+  padding: 1.25rem 2rem 2rem;
+  background: #fff;
+  color: #111;
+}
+
+/* Default-browser blue/purple link colors. These are the iconic
+ * "document" colors; kept underlined as the universal affordance. */
+a {
+  color: #0000ee;
+}
+
+a:visited {
+  color: #551a8b;
+}
+
+a:hover,
+a:focus {
+  color: #ee0000;
+}
+
+/* ── Typography ──────────────────────────────────────────────── */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* Slightly different stack for headings — sans-serif here would
+   * look too "modern web app" given the rest is Times. Stay serif
+   * but let the system substitute Georgia where Times isn't elegant
+   * (notably some Linux distros). */
+  font-family: Georgia, "Times New Roman", Times, serif;
+  color: #005a9c; /* W3C TR navy */
+  line-height: 1.25;
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* TR-style underline rule on top-level section headings. */
+h1 {
+  font-size: 1.75rem;
+  border-bottom: 1px solid #aaa;
+  padding-bottom: 0.25rem;
+}
+
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.2rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+h4,
+h5,
+h6 {
+  font-size: 1rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+ul,
+ol {
+  margin: 0.5rem 0;
+  padding-left: 2rem;
+}
+
+li {
+  margin: 0.25rem 0;
+}
+
+dl {
+  margin: 0.5rem 0;
+}
+
+dt {
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+dd {
+  margin: 0 0 0.25rem 1.5rem;
+}
+
+blockquote {
+  margin: 1rem 0 1rem 1.5rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid #ccc;
+  color: #333;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #ccc;
+  margin: 1.5rem 0;
+}
+
+/* ── Code ────────────────────────────────────────────────────── */
+
+code,
+kbd,
+samp,
+pre {
+  font-family: "Courier New", Courier, monospace;
+}
+
+code {
+  font-size: 0.95em;
+}
+
+pre {
+  overflow-x: auto;
+  max-width: 100%;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: #f6f6f0; /* pale parchment, the W3C example-block tint */
+  border: 1px solid #ddd;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* Shiki emits `<pre class="shiki ..."><code>...</code></pre>` with an
+ * inline `style` for background/color. The base `pre` rule above
+ * supplies overflow-x; restate it scoped to the shiki class so any
+ * shipped Shiki CSS that resets `overflow` can't out-cascade us. */
+pre.shiki,
+pre[class*="shiki"] {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Multi-chunk Shiki blocks — BlobView splits files >200 lines into N
+ * Suspense-wrapped chunks rendered as `<pre class="shiki">` siblings
+ * (each in a `<div>` child of `.rg-shiki-host`). The base `pre` rule
+ * above sets a 1px border + 1rem vertical margin, so without merging
+ * a long file would render as N stacked bordered boxes with hairline
+ * gaps between. Drop the seam borders + margins so the chunks read
+ * as one continuous example block, the W3C TR way. */
+.rg-shiki-host > div:not(:first-child) > pre.shiki {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.rg-shiki-host > div:not(:last-child) > pre.shiki {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+
+table {
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+}
+
+th,
+td {
+  padding: 0.25rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  border-bottom: 1px solid #aaa;
+}
+
+/* ── Forms / buttons ─────────────────────────────────────────── */
+
+button {
+  font: inherit;
+  padding: 0.125rem 0.5rem;
+  background: #f4f4f4;
+  border: 1px solid #888;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:hover,
+button:focus {
+  background: #e8e8e8;
+}
+
+/* ── Default-theme decoration we hide ─────────────────────────── */
+
+.rg-ambient,
+.rg-ambient-grid,
+.rg-ambient-scan,
+.rg-ambient-glow {
+  display: none;
+}
+
+.rg-statusbar-pulse,
+.rg-statusbar-cursor,
+.rg-hud-brand-mark {
+  display: none;
+}
+
+/* ── App shell ────────────────────────────────────────────────── */
+
+.rg-app {
+  /* Full viewport width minus body's side gutters. No centered narrow
+   * column — the W3C TR stylesheet does cap line length at ~50em, but
+   * for a repo browser that holds wide tables (file trees, diff
+   * tables, hunk lines) a fixed reading-width column wastes screen
+   * and forces premature horizontal scroll on diffs that would
+   * otherwise fit. Body's `padding` provides the only gutter. */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  /* Flex items default to `min-width: auto`, which makes a wide
+   * `<pre>` (e.g. shiki) refuse to shrink below its content width.
+   * `overflow-x: auto` then never engages because the flex item
+   * silently expands. Setting `min-width: 0` on every column-flex
+   * container down to the pre's parent restores scrolling. */
+  min-width: 0;
+}
+
+.rg-stage,
+.rg-overview,
+.rg-main,
+.rg-blob,
+.rg-blob-content,
+.rg-prose,
+.rg-diff-files,
+.rg-diff {
+  min-width: 0;
+}
+
+/* ── HUD ──────────────────────────────────────────────────────── */
+
+.rg-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.rg-hud-brand {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #005a9c;
+}
+
+.rg-hud-brand-sha {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+  color: #555;
+}
+
+.rg-hud-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.rg-hud-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rg-hud-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.rg-hud-status-dot {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  background: currentColor;
+}
+
+/* ── Statusbar (footer-ish strip, normal flow) ─────────────────── */
+
+.rg-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  margin-top: 1.5rem;
+  border-top: 1px solid #ccc;
+  font-size: 0.875rem;
+  color: #555;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.rg-statusbar-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rg-statusbar-key {
+  font-weight: bold;
+  color: #333;
+}
+
+.rg-statusbar-cell-grow {
+  flex: 1;
+}
+
+/* ── Stage / page chrome ──────────────────────────────────────── */
+
+.rg-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rg-overview,
+.rg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rg-header {
+  padding-bottom: 0.5rem;
+}
+
+.rg-title {
+  margin: 0;
+}
+
+.rg-description {
+  margin: 0.5rem 0 0;
+  color: #333;
+}
+
+.rg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
+}
+
+.rg-meta > div {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.rg-meta dt {
+  margin: 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.rg-meta dt::after {
+  content: ":";
+}
+
+.rg-meta dd {
+  margin: 0;
+}
+
+.rg-section {
+  margin: 0;
+}
+
+.rg-section h2 {
+  margin: 0 0 0.5rem;
+}
+
+/* Crumbs */
+.rg-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding-bottom: 0.5rem;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95rem;
+}
+
+.rg-crumbs-leaf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: bold;
+}
+
+.rg-ref-name {
+  font-family: "Courier New", Courier, monospace;
+}
+
+/* Notices — pale yellow band, classic W3C "Editor's Note" look */
+.rg-static-notice {
+  margin: 0.75rem 0;
+  padding: 0.5rem 0.75rem;
+  background: #fffbe6;
+  border-left: 4px solid #e7c000;
+  font-size: 0.95rem;
+}
+
+.rg-error {
+  font-weight: bold;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  background: #fdecea;
+  border-left: 4px solid #c0392b;
+  color: #602020;
+}
+
+/* SHA */
+.rg-sha {
+  font-family: "Courier New", Courier, monospace;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rg-commit-link {
+  color: #0000ee;
+}
+
+/* ── File browser ─────────────────────────────────────────────── */
+
+.rg-tree {
+  margin: 0.5rem 0;
+  width: 100%;
+}
+
+.rg-tree thead th {
+  padding: 0.25rem 0.75rem;
+  font-weight: bold;
+  border-bottom: 1px solid #aaa;
+}
+
+.rg-tree-row td {
+  padding: 0.25rem 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.rg-tree-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.rg-tree-size {
+  white-space: nowrap;
+  font-family: "Courier New", Courier, monospace;
+  color: #555;
+}
+
+/* w3c FileIcon returns null; hide the slot defensively. */
+.rg-glyph {
+  display: none;
+}
+
+/* ── Blob view ────────────────────────────────────────────────── */
+
+.rg-blob {
+  margin: 0.5rem 0;
+}
+
+.rg-blob-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.rg-blob-path {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.rg-blob-meta {
+  display: inline-flex;
+  gap: 1rem;
+  align-items: center;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.rg-blob-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0;
+}
+
+.rg-blob-content {
+  padding: 0.5rem 0;
+}
+
+.rg-blob-content-markdown {
+  padding: 0.75rem 0;
+}
+
+.rg-blob-content-rawmeta {
+  padding: 0.5rem 0;
+}
+
+.rg-blob-rawmeta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+}
+
+.rg-blob-rawmeta dt {
+  font-weight: bold;
+  color: #333;
+}
+
+.rg-blob-rawmeta dt::after {
+  content: ":";
+}
+
+.rg-blob-rawmeta dd {
+  margin: 0;
+}
+
+.rg-blob-rawmeta-line {
+  margin: 0 0 0.5rem;
+}
+
+.rg-blob-rawmeta-label {
+  font-weight: bold;
+}
+
+.rg-blob-empty {
+  padding: 0.75rem 0;
+  font-style: italic;
+  color: #555;
+}
+
+.rg-blob-fallback {
+  margin: 0;
+  padding: 0;
+}
+
+/* Toggles — plain button group */
+.rg-blob-view-toggle,
+.rg-diff-toggle {
+  display: inline-flex;
+  gap: 0;
+}
+
+.rg-blob-view-btn,
+.rg-diff-toggle-btn {
+  background: #f4f4f4;
+  border: 1px solid #888;
+  border-right-width: 0;
+  color: inherit;
+  padding: 0.125rem 0.625rem;
+  font-family: inherit;
+}
+
+.rg-blob-view-btn:last-child,
+.rg-diff-toggle-btn:last-child {
+  border-right-width: 1px;
+}
+
+.rg-blob-view-btn:hover,
+.rg-diff-toggle-btn:hover {
+  background: #e8e8e8;
+}
+
+.rg-blob-view-btn.is-active,
+.rg-diff-toggle-btn.is-active {
+  background: #005a9c;
+  color: #fff;
+  border-color: #005a9c;
+  font-weight: bold;
+}
+
+/* ── Prose (markdown) ─────────────────────────────────────────── */
+
+.rg-prose h1,
+.rg-prose h2,
+.rg-prose h3,
+.rg-prose h4,
+.rg-prose h5,
+.rg-prose h6 {
+  margin: 1.25rem 0 0.5rem;
+}
+
+.rg-prose p {
+  margin: 0 0 0.75rem;
+}
+
+.rg-prose ul,
+.rg-prose ol {
+  margin: 0 0 0.75rem;
+  padding-left: 2rem;
+}
+
+.rg-prose blockquote {
+  margin: 0 0 0.75rem 1rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid #ccc;
+  color: #333;
+}
+
+.rg-prose hr {
+  border: 0;
+  border-top: 1px solid #ccc;
+  margin: 1.5rem 0;
+}
+
+.rg-prose pre {
+  margin: 0.75rem 0;
+}
+
+/* ── Diff view ────────────────────────────────────────────────── */
+
+.rg-diff-files {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rg-diff {
+  margin: 0;
+  border: 1px solid #ddd;
+}
+
+.rg-diff-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: #f4f4f4;
+  border-bottom: 1px solid #ddd;
+}
+
+.rg-diff-path {
+  flex: 1;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+}
+
+.rg-diff-stats {
+  display: inline-flex;
+  gap: 0.5rem;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+}
+
+.rg-file-badge {
+  display: inline-block;
+  padding: 0 0.375rem;
+  border: 1px solid #888;
+  background: #fff;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.rg-diff-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.rg-hunk {
+  margin: 0;
+  /* The hunk is the scroll viewport for its `<table>`. Without
+   * `overflow-x: auto` here, a long `.rg-line-text` (which has
+   * `white-space: pre`) blows past the parent's max-width and
+   * pushes the whole `.rg-diff` card wider than the viewport.
+   * Setting overflow on the hunk lets the table scroll inside
+   * the card while the card itself stays bounded. */
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.rg-hunk-header {
+  padding: 0.25rem 0.75rem;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.rg-hunk-range {
+  font-weight: bold;
+  color: #005a9c;
+}
+
+.rg-hunk-context {
+  margin-left: 0.75rem;
+  color: #333;
+}
+
+.rg-hunk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+}
+
+.rg-hunk-table td {
+  padding: 0 0.5rem;
+  vertical-align: top;
+}
+
+/* Diff line backgrounds — TR-style: faint green for added, faint
+ * red for removed. Just enough hue to scan quickly without being
+ * fluorescent. */
+.rg-hunk-table tr.rg-line-add {
+  background: #e6ffed;
+}
+
+.rg-hunk-table tr.rg-line-del {
+  background: #ffeef0;
+}
+
+.rg-ln {
+  text-align: right;
+  padding-right: 0.5rem;
+  user-select: none;
+  white-space: nowrap;
+  color: #888;
+}
+
+.rg-line-marker {
+  padding: 0 0.25rem;
+  user-select: none;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #555;
+}
+
+.rg-line-text {
+  white-space: pre;
+}
+
+.rg-hunk-split-table {
+  table-layout: fixed;
+}
+
+.rg-split-cell {
+  padding: 0 0.5rem;
+  vertical-align: top;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Diff summary — `<section><header>…</header><ul>…</ul></section>`.
+ * `.rg-diff-summary` is the section container; reset the inner `<ul>`
+ * and lay out the `<header>` so "X files changed" + the totals
+ * sit on a single justified line in the W3C document style. */
+.rg-diff-summary {
+  margin: 0 0 0.75rem;
+}
+.rg-diff-summary > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+.rg-diff-summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rg-diff-summary li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.125rem 0;
+}
+.rg-diff-summary li > a {
+  /* Inline-flex so file badge + icon + path align on one row;
+   * `min-width: 0` lets long paths shrink without pushing the
+   * stats column off the line. */
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.rg-diff-summary-stats {
+  white-space: nowrap;
+  font-family: "Courier New", Courier, monospace;
+}
+
+/* ── Commit list ──────────────────────────────────────────────── */
+
+.rg-commit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rg-commit {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  align-items: baseline;
+  border-bottom: 1px solid #eee;
+}
+
+.rg-commit:last-child {
+  border-bottom: 0;
+}
+
+.rg-author,
+.rg-commit time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* ── Commit detail ────────────────────────────────────────────── */
+
+.rg-commit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.rg-commit-subject {
+  margin: 0;
+}
+
+.rg-commit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.rg-commit-body {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+.rg-ref-head-badge {
+  display: inline-block;
+  padding: 0 0.375rem;
+  border: 1px solid #005a9c;
+  background: #eaf3fb;
+  color: #005a9c;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85rem;
+  margin-left: 0.25rem;
+}
+
+/* ── Commit calendar ────────────────────────────────────────────── */
+
+.rg-cal {
+  margin: 1.5em 0;
+}
+
+.rg-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rg-cal-heading {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #005a9c; /* W3C TR navy */
+  margin: 0;
+}
+
+.rg-cal-legend {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 0.85rem;
+  color: #555;
+  font-style: italic;
+}
+
+.rg-cal-legend-cell {
+  border: 1px solid #aaa;
+}
+
+.rg-cal-day-label,
+.rg-cal-month-label {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 9px;
+  fill: #555;
+}
+
+.rg-cal-cell {
+  stroke: #aaa;
+  stroke-width: 0.5;
+}
+
+/* Tiers — W3C navy ramp, document-aesthetic. */
+.rg-cal-l0 {
+  fill: #f0f0f0;
+}
+.rg-cal-l1 {
+  fill: #cfdef0;
+}
+.rg-cal-l2 {
+  fill: #93b8da;
+}
+.rg-cal-l3 {
+  fill: #4682b4;
+}
+.rg-cal-l4 {
+  fill: #005a9c;
+}

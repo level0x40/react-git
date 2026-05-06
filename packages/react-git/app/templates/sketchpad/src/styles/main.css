@@ -1,0 +1,993 @@
+/* Sketchpad — hand-marker aesthetic on warm cream paper.
+ *
+ * Visual language:
+ *
+ *   - Cream paper background with a faint hand-ruled horizontal
+ *     overlay so the page reads as graph paper.
+ *   - Coral (#ff6b6b) primary accent, teal (#4ecdc4) secondary.
+ *   - Dashed 2px section dividers — "drawn with a marker on a pad."
+ *   - Rounded sans (Nunito / Quicksand fallback to system rounded)
+ *     so it never feels like the GitHub or W3C-spec families used
+ *     elsewhere.
+ *   - No card framing; sections flow directly on the cream paper.
+ *   - Diff retains a card so file-by-file changes stay contained.
+ *   - Big emoji FileIcon in `.rg-glyph-emoji` (the JSX swap lives
+ *     in `src/components/FileIcon.jsx` — sketchpad is the first
+ *     built-in template that ships a component override alongside
+ *     its stylesheet).
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Palette */
+  --sk-paper: #fff8f0;
+  --sk-paper-2: #fdeede;
+  --sk-ink: #3a2e26;
+  --sk-ink-2: #6e5d51;
+  --sk-coral: #ff6b6b;
+  --sk-coral-2: #ff4f4f;
+  --sk-teal: #4ecdc4;
+  --sk-teal-2: #3eb8af;
+  --sk-rule: #e8d8c4;
+  --sk-add: #2f9e44;
+  --sk-rem: #c92a2a;
+
+  --sk-font-sans:
+    "Nunito", "Quicksand", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui,
+    sans-serif;
+  --sk-font-mono:
+    "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+html {
+  color-scheme: light;
+  background: var(--sk-paper);
+  color: var(--sk-ink);
+  font-family: var(--sk-font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background:
+    /* Faint horizontal rule overlay so the page reads as graph paper. */ repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 31px,
+    rgba(58, 46, 38, 0.04) 31px,
+    rgba(58, 46, 38, 0.04) 32px
+  );
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--sk-coral);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration: underline wavy var(--sk-coral) 1.5px;
+  color: var(--sk-coral-2);
+}
+
+button {
+  font: inherit;
+  padding: 4px 12px;
+  background: transparent;
+  color: inherit;
+  border: 2px dashed var(--sk-rule);
+  border-radius: 999px;
+  cursor: pointer;
+}
+button:hover {
+  border-color: var(--sk-coral);
+  color: var(--sk-coral);
+}
+
+code {
+  font-family: var(--sk-font-mono);
+  font-size: 0.9em;
+}
+
+/* Inline-code pill — ONLY in prose-adjacent contexts. Chrome `<code>`
+ * (SHAs, paths, breadcrumb crumbs) stays plain monospace. */
+.rg-prose code,
+.rg-static-notice code {
+  background: var(--sk-paper-2);
+  border: 1px dashed var(--sk-rule);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+pre {
+  font-family: var(--sk-font-mono);
+  margin: 0;
+  padding: 14px 16px;
+  background: #fffcf6;
+  border: 2px dashed var(--sk-rule);
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+pre code {
+  font-size: inherit;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* ── App shell ───────────────────────────────────────────────── */
+
+/* Hide the default theme's ambient and statusbar decorations. */
+.rg-ambient,
+.rg-ambient-grid,
+.rg-ambient-scan,
+.rg-ambient-glow,
+.rg-statusbar,
+.rg-statusbar-pulse,
+.rg-statusbar-cursor {
+  display: none;
+}
+
+.rg-app {
+  width: 100%;
+  margin: 0;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── HUD ─────────────────────────────────────────────────────── */
+
+.rg-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 16px;
+  border: 2px dashed var(--sk-coral);
+  border-radius: 12px;
+  background: var(--sk-paper-2);
+  margin-bottom: 8px;
+}
+
+.rg-hud-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--sk-coral);
+}
+.rg-hud-brand:hover {
+  color: var(--sk-coral-2);
+}
+.rg-hud-brand-mark {
+  /* The package's default mark is a bullet/glyph; here the
+   * sketchpad emoji prefix is enough — hide the placeholder. */
+  display: none;
+}
+.rg-hud-brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.rg-hud-brand-name::before {
+  content: "✏️ ";
+}
+.rg-hud-brand-sha {
+  font-family: var(--sk-font-mono);
+  font-size: 0.75rem;
+  color: var(--sk-ink-2);
+  text-decoration: none;
+  padding: 2px 8px;
+  border: 1px dashed var(--sk-rule);
+  border-radius: 8px;
+}
+.rg-hud-brand-sha:hover {
+  border-color: var(--sk-coral);
+  color: var(--sk-coral);
+}
+
+.rg-hud-nav {
+  display: inline-flex;
+  gap: 14px;
+  margin-left: auto;
+  align-items: center;
+}
+.rg-hud-nav a {
+  color: var(--sk-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.rg-hud-nav a:hover {
+  color: var(--sk-coral);
+  text-decoration: none;
+}
+
+.rg-hud-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--sk-ink-2);
+}
+.rg-hud-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sk-teal);
+}
+
+/* ── Stage / overview ────────────────────────────────────────── */
+
+.rg-stage,
+.rg-overview,
+.rg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.rg-header {
+  padding-bottom: 8px;
+  border-bottom: 2px dashed var(--sk-coral);
+}
+.rg-title {
+  margin: 0 0 6px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--sk-coral);
+  letter-spacing: -0.02em;
+}
+.rg-description {
+  margin: 0;
+  color: var(--sk-ink-2);
+}
+
+.rg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+}
+.rg-meta > div {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.rg-meta dt {
+  font-weight: 600;
+  color: var(--sk-teal-2);
+}
+.rg-meta dt::after {
+  content: ":";
+}
+.rg-meta dd {
+  margin: 0;
+}
+
+.rg-section h2 {
+  font-size: 1.15rem;
+  margin: 0 0 8px;
+  color: var(--sk-teal-2);
+  font-weight: 700;
+}
+
+/* ── Crumbs ──────────────────────────────────────────────────── */
+
+.rg-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 2px dashed var(--sk-rule);
+  font-size: 0.95rem;
+}
+.rg-crumbs > * {
+  font-size: inherit;
+  line-height: 1.4;
+}
+.rg-crumbs > a {
+  color: var(--sk-coral);
+  font-weight: 600;
+}
+.rg-crumbs > a:hover {
+  text-decoration: underline;
+}
+.rg-crumbs > span[aria-hidden="true"] {
+  color: var(--sk-ink-2);
+}
+.rg-crumbs code,
+.rg-crumbs .rg-ref-name,
+.rg-crumbs .rg-sha {
+  font-family: var(--sk-font-mono);
+  font-size: inherit;
+  font-weight: inherit;
+}
+.rg-crumbs-leaf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--sk-ink);
+}
+
+/* ── Errors / notices ────────────────────────────────────────── */
+
+.rg-error {
+  padding: 12px 16px;
+  margin: 0;
+  background: #ffe8e8;
+  border: 2px dashed var(--sk-coral-2);
+  border-radius: 10px;
+  color: #6e2222;
+  font-weight: 600;
+}
+
+.rg-static-notice {
+  padding: 12px 16px;
+  margin: 0;
+  background: #e6fbf8;
+  border: 2px dashed var(--sk-teal);
+  border-radius: 10px;
+  color: var(--sk-ink);
+}
+
+/* ── Adders/removers/tints ───────────────────────────────────── */
+
+.rg-add {
+  color: var(--sk-add);
+  font-weight: 700;
+}
+.rg-rem {
+  color: var(--sk-rem);
+  font-weight: 700;
+}
+
+/* ── SHA marker — no chip; monospace text only ───────────────── */
+
+.rg-sha {
+  font-family: var(--sk-font-mono);
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.rg-commit-link {
+  color: inherit;
+  text-decoration: none;
+}
+.rg-commit-link:hover {
+  color: var(--sk-coral);
+}
+
+.rg-ref-name {
+  font-family: var(--sk-font-mono);
+  font-size: 0.875rem;
+}
+.rg-ref-head-badge {
+  display: inline-block;
+  padding: 0 8px;
+  border: 1px dashed var(--sk-teal-2);
+  background: #e6fbf8;
+  color: var(--sk-teal-2);
+  font-family: var(--sk-font-mono);
+  font-size: 0.75rem;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+
+/* ── File browser ────────────────────────────────────────────── */
+
+.rg-tree thead {
+  border-bottom: 2px dashed var(--sk-rule);
+}
+.rg-tree thead th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sk-ink-2);
+  font-weight: 700;
+}
+.rg-tree-row {
+  border-bottom: 1px dashed var(--sk-rule);
+}
+.rg-tree-row:last-child {
+  border-bottom: none;
+}
+.rg-tree-row td {
+  padding: 8px 12px;
+}
+.rg-tree-row:hover {
+  background: var(--sk-paper-2);
+}
+.rg-tree-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sk-ink);
+  font-weight: 600;
+}
+.rg-tree-name:hover {
+  color: var(--sk-coral);
+}
+.rg-tree-size {
+  color: var(--sk-ink-2);
+  font-family: var(--sk-font-mono);
+  font-size: 0.825rem;
+}
+
+/* Emoji glyph — sized so emojis read at the same visual weight as
+ * the surrounding sans-serif text. */
+.rg-glyph-emoji {
+  font-size: 1.05em;
+  line-height: 1;
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+}
+
+/* ── Blob view ───────────────────────────────────────────────── */
+
+.rg-blob-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 2px dashed var(--sk-coral);
+}
+.rg-blob-path {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.rg-blob-path-text {
+  font-family: var(--sk-font-mono);
+  font-size: 0.95rem;
+}
+.rg-blob-meta {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  color: var(--sk-ink-2);
+  font-size: 0.85rem;
+}
+.rg-blob-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--sk-rule);
+}
+.rg-blob-content {
+  padding: 0;
+}
+.rg-blob-content-markdown {
+  padding: 12px 0;
+}
+.rg-blob-content-rawmeta {
+  padding: 12px 0;
+}
+.rg-blob-rawmeta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 14px;
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+}
+.rg-blob-rawmeta dt {
+  font-weight: 700;
+  color: var(--sk-teal-2);
+}
+.rg-blob-rawmeta dt::after {
+  content: ":";
+}
+.rg-blob-rawmeta dd {
+  margin: 0;
+}
+.rg-blob-empty {
+  padding: 10px 0;
+  font-style: italic;
+  color: var(--sk-ink-2);
+}
+
+/* Toggles — round dashed pills, coral when active */
+.rg-blob-view-toggle,
+.rg-diff-toggle {
+  display: inline-flex;
+  gap: 6px;
+}
+.rg-blob-view-btn,
+.rg-diff-toggle-btn {
+  background: transparent;
+  border: 2px dashed var(--sk-rule);
+  color: var(--sk-ink);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.rg-blob-view-btn:hover,
+.rg-diff-toggle-btn:hover {
+  border-color: var(--sk-coral);
+  color: var(--sk-coral);
+}
+.rg-blob-view-btn.is-active,
+.rg-diff-toggle-btn.is-active {
+  border-color: var(--sk-coral);
+  background: var(--sk-coral);
+  color: #fff;
+}
+
+/* ── Shiki host — let theme paint its own bg, dashed frame ──── */
+
+.rg-shiki-host pre.shiki {
+  border: 2px dashed var(--sk-rule);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 0;
+  font-size: 0.875rem;
+}
+.rg-prose .rg-shiki-host pre.shiki,
+.rg-prose pre.shiki {
+  margin: 24px 0;
+}
+.rg-shiki-line {
+  font-family: var(--sk-font-mono);
+  font-size: inherit;
+}
+
+/* Multi-chunk Shiki blocks — long files (>200 lines) split into N
+ * Suspense-wrapped chunks. Strip seam edges so the dashed sketchpad
+ * frame wraps the entire merged stack instead of every individual
+ * chunk. */
+.rg-shiki-host > div:not(:first-child) > pre.shiki {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.rg-shiki-host > div:not(:last-child) > pre.shiki {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* ── Prose ───────────────────────────────────────────────────── */
+
+.rg-prose h1,
+.rg-prose h2,
+.rg-prose h3,
+.rg-prose h4,
+.rg-prose h5,
+.rg-prose h6 {
+  margin: 1.2rem 0 0.5rem;
+  color: var(--sk-coral);
+  font-weight: 700;
+}
+.rg-prose h1 {
+  font-size: 1.6rem;
+}
+.rg-prose h2 {
+  font-size: 1.3rem;
+}
+.rg-prose h3 {
+  font-size: 1.1rem;
+}
+.rg-prose p {
+  margin: 0 0 0.75rem;
+}
+.rg-prose ul,
+.rg-prose ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.75rem;
+}
+.rg-prose blockquote {
+  margin: 0.75rem 0;
+  padding: 8px 14px;
+  border-left: 4px solid var(--sk-teal);
+  background: #effbf9;
+  border-radius: 0 8px 8px 0;
+  color: var(--sk-ink);
+}
+.rg-prose hr {
+  border: 0;
+  border-top: 2px dashed var(--sk-rule);
+  margin: 18px 0;
+}
+.rg-prose img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+.rg-prose pre {
+  margin: 14px 0;
+}
+
+/* ── Diff view — kept carded so each file's hunks stay contained */
+
+.rg-diff-files {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.rg-diff {
+  border: 2px dashed var(--sk-coral);
+  border-radius: 12px;
+  background: #fffcf6;
+  overflow: hidden;
+}
+.rg-diff-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 2px dashed var(--sk-rule);
+}
+.rg-diff-path {
+  flex: 1;
+  font-family: var(--sk-font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+  min-width: 0;
+}
+.rg-diff-path-link {
+  color: var(--sk-coral);
+  text-decoration: none;
+}
+.rg-diff-path-link:hover {
+  text-decoration: underline;
+}
+.rg-diff-stats {
+  display: inline-flex;
+  gap: 8px;
+  font-family: var(--sk-font-mono);
+  font-size: 0.8rem;
+}
+
+.rg-file-badge {
+  display: inline-block;
+  width: 26px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 2px 0;
+  border-radius: 999px;
+  font-family: var(--sk-font-mono);
+}
+.rg-file-badge-added {
+  background: #d3f9d8;
+  color: var(--sk-add);
+}
+.rg-file-badge-deleted {
+  background: #ffe3e3;
+  color: var(--sk-rem);
+}
+.rg-file-badge-modified {
+  background: #fff3bf;
+  color: #806c00;
+}
+.rg-file-badge-renamed {
+  background: #f3d9fa;
+  color: #862e9c;
+}
+.rg-file-badge-copied {
+  background: #d0ebff;
+  color: #1864ab;
+}
+
+.rg-diff-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 14px;
+  border-bottom: 1px dashed var(--sk-rule);
+}
+.rg-hunks {
+  padding: 0;
+}
+.rg-hunk {
+  border-top: 1px dashed var(--sk-rule);
+}
+.rg-hunk:first-child {
+  border-top: none;
+}
+.rg-hunk-header {
+  color: var(--sk-ink-2);
+  padding: 6px 14px;
+  font-family: var(--sk-font-mono);
+  font-size: 0.75rem;
+}
+.rg-hunk-range {
+  font-weight: 700;
+  color: var(--sk-coral);
+}
+.rg-hunk-context {
+  margin-left: 12px;
+}
+
+.rg-hunk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sk-font-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.rg-hunk-table td {
+  padding: 0 8px;
+  vertical-align: top;
+}
+.rg-ln {
+  text-align: right;
+  width: 50px;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--sk-ink-2);
+  border-right: 1px dashed var(--sk-rule);
+  opacity: 0.7;
+}
+.rg-line-marker {
+  width: 16px;
+  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--sk-ink-2);
+}
+.rg-line-text {
+  white-space: pre;
+}
+.rg-line-add {
+  background: rgba(47, 158, 68, 0.1);
+}
+.rg-line-add .rg-line-marker,
+.rg-line-add .rg-ln-new {
+  color: var(--sk-add);
+}
+.rg-line-remove {
+  background: rgba(201, 42, 42, 0.1);
+}
+.rg-line-remove .rg-line-marker,
+.rg-line-remove .rg-ln-old {
+  color: var(--sk-rem);
+}
+.rg-line-context {
+  background: transparent;
+}
+
+.rg-hunk-split-table {
+  table-layout: fixed;
+}
+.rg-split-cell {
+  padding: 0 8px;
+  vertical-align: top;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rg-split-add {
+  background: rgba(47, 158, 68, 0.1);
+}
+.rg-split-remove {
+  background: rgba(201, 42, 42, 0.1);
+}
+.rg-split-context {
+  background: transparent;
+}
+.rg-split-empty {
+  background: var(--sk-paper-2);
+  opacity: 0.4;
+}
+
+/* Strip the inline-code pill on diff-line code elements (they ARE
+ * source code, not inline references). */
+.rg-line-text code,
+.rg-split-cell code,
+code.rg-shiki-line {
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  font-weight: inherit;
+}
+
+/* ── Diff summary ─────────────────────────────────────────────── */
+
+.rg-diff-summary {
+  margin: 0;
+}
+.rg-diff-summary > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px dashed var(--sk-rule);
+}
+.rg-diff-summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rg-diff-summary li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--sk-rule);
+}
+.rg-diff-summary li:last-child {
+  border-bottom: none;
+}
+.rg-diff-summary li:hover {
+  background: var(--sk-paper-2);
+}
+.rg-diff-summary a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  color: var(--sk-coral);
+  font-family: var(--sk-font-mono);
+  font-size: 0.875rem;
+}
+.rg-diff-summary-stats {
+  white-space: nowrap;
+  font-family: var(--sk-font-mono);
+  font-size: 0.8rem;
+}
+.rg-diff-summary-count {
+  color: var(--sk-ink-2);
+  font-size: 0.875rem;
+}
+
+/* ── Commit list ─────────────────────────────────────────────── */
+
+.rg-commit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 2px dashed var(--sk-rule);
+}
+.rg-commit {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--sk-rule);
+  align-items: center;
+}
+.rg-commit:hover {
+  background: var(--sk-paper-2);
+}
+.rg-subject {
+  color: var(--sk-ink);
+  font-weight: 600;
+}
+.rg-author,
+.rg-commit time {
+  color: var(--sk-ink-2);
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* ── Commit detail ───────────────────────────────────────────── */
+
+.rg-commit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+.rg-commit-subject {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--sk-coral);
+}
+.rg-commit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.875rem;
+  color: var(--sk-ink-2);
+}
+.rg-commit-body {
+  margin: 0;
+}
+
+/* ── Commit calendar ────────────────────────────────────────────── */
+
+.rg-cal {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 2px dashed var(--sk-rule);
+  background: var(--sk-paper-2);
+}
+
+.rg-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rg-cal-heading {
+  font-family: var(--sk-font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sk-coral);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rg-cal-legend {
+  font-family: var(--sk-font-sans);
+  font-size: 0.75rem;
+  color: var(--sk-ink-2);
+}
+
+.rg-cal-legend-cell {
+  border: 1px solid var(--sk-ink);
+}
+
+.rg-cal-day-label,
+.rg-cal-month-label {
+  font-family: var(--sk-font-mono);
+  font-size: 9px;
+  fill: var(--sk-ink-2);
+}
+
+.rg-cal-cell {
+  stroke: var(--sk-ink);
+  stroke-width: 0.75;
+}
+
+/* Coral-to-teal ramp — sketchpad leans into both accent colors
+ * instead of the conventional single-hue green ramp. */
+.rg-cal-l0 {
+  fill: var(--sk-paper);
+}
+.rg-cal-l1 {
+  fill: rgba(78, 205, 196, 0.35);
+}
+.rg-cal-l2 {
+  fill: rgba(78, 205, 196, 0.7);
+}
+.rg-cal-l3 {
+  fill: var(--sk-coral);
+}
+.rg-cal-l4 {
+  fill: var(--sk-coral-2);
+}

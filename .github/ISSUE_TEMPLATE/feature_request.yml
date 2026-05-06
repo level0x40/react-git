@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest a capability, flag, template, or API the project doesn't have yet.
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, please check [open and closed issues](https://github.com/level0x40/react-git/issues?q=is%3Aissue) for prior discussion. For open-ended ideas, [Discussions](https://github.com/level0x40/react-git/discussions) is often a better starting point.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: |
+        Describe the situation that led you here. Concrete is better than abstract — "I want to render a contribution graph for a private mirror at $WORK" is more useful than "more visualization options".
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to see?
+      description: A specific proposal — a CLI flag, a template entry, an API addition, a config option. If you don't have one, that's fine; describe the outcome you want.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Workarounds you've tried, related tools, or approaches you've ruled out and why.
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Mockups, links to similar features in other tools, prior art.

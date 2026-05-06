@@ -1,0 +1,66 @@
+{
+  "name": "@level0x40/react-git",
+  "version": "0.0.2",
+  "description": "Static Git source artifact viewer powered by @lazarv/react-server. Render any local Git repo as a publishable React UI.",
+  "keywords": [
+    "documentation",
+    "git",
+    "level0x40",
+    "react",
+    "react-server",
+    "react-server-components",
+    "rsc",
+    "source-viewer",
+    "static-site"
+  ],
+  "homepage": "https://react-git.level0x40.com",
+  "bugs": {
+    "url": "https://github.com/level0x40/react-git/issues"
+  },
+  "license": "MIT",
+  "author": "Level 0x40 Labs (https://level0x40.com)",
+  "contributors": [
+    "Viktor Lázár <lazarv1982@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/level0x40/react-git.git",
+    "directory": "packages/react-git"
+  },
+  "bin": {
+    "react-git": "./bin/react-git.mjs",
+    "rg": "./bin/react-git.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "app",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./source": "./src/runtime/source.js",
+    "./source/build": "./src/runtime/source-build.js",
+    "./source/types": "./src/git/types.js",
+    "./vite": "./src/runtime/vite-plugin.js",
+    "./template": "./src/template.js",
+    "./template-plugin": "./src/runtime/template-plugin.js",
+    "./impl/*": "./app/src/impl/*",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "clean": "rm -rf react-git"
+  },
+  "dependencies": {
+    "@lazarv/react-server": "0.0.0-experimental-675fbba-20260506-52f692e4",
+    "marked": "^18.0.3",
+    "shiki": "^4.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
+}

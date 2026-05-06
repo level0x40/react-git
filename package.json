@@ -1,0 +1,40 @@
+{
+  "name": "level0x40-react-git-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Workspace root for @level0x40/react-git and its docs site.",
+  "homepage": "https://github.com/level0x40/react-git#readme",
+  "bugs": {
+    "url": "https://github.com/level0x40/react-git/issues"
+  },
+  "license": "MIT",
+  "author": "Level 0x40 Labs (https://level0x40.com)",
+  "contributors": [
+    "Viktor Lázár <lazarv1982@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/level0x40/react-git.git"
+  },
+  "type": "module",
+  "scripts": {
+    "react-git": "pnpm --filter @level0x40/react-git",
+    "docs": "pnpm --filter @level0x40/react-git-docs",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm publish --recursive --access public --no-git-checks --provenance"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.10",
+    "@level0x40/react-git": "workspace:*",
+    "oxfmt": "^0.47.0",
+    "oxlint": "^1.62.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
+}

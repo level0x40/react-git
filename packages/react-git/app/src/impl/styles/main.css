@@ -1,0 +1,72 @@
+/* react-git — minimal base stylesheet.
+ *
+ * This file is the absolute floor for the runtime: only the rules a
+ * page would otherwise have to copy verbatim to keep from breaking.
+ * Everything visual lives in `app/templates/<name>/src/styles/main.css`;
+ * an active template fully *replaces* this base via the
+ * `virtual:rg/style/main` indirection (the plugin returns the
+ * template's file directly when one is provided, this file only
+ * when no template is active).
+ *
+ * In normal CLI use a template is *always* active (`--template`
+ * defaults to `default`), so this file is the headless / no-template
+ * fallback. It exists so that running react-git without selecting
+ * any template still produces a self-coherent if drab page rather
+ * than an HTML-rendered-with-no-CSS pile.
+ *
+ * # What stays here
+ *
+ *   - `box-sizing: border-box` reset — every theme wants it; making
+ *     each theme repeat it just adds friction.
+ *   - `html, body { margin: 0 }` — the browser-default 8px gutter
+ *     causes hairline misalignment with any full-width chrome
+ *     (statusbars, sticky headers). Resetting once here is a better
+ *     starting point than every theme having to override.
+ *   - `pre { overflow-x: auto }` — without this, a single long line
+ *     in any code/diff view pushes page width and breaks every other
+ *     row's alignment. Structurally load-bearing for the data we
+ *     render, not visual taste.
+ *
+ * Templates are self-contained — they include their own box-sizing
+ * reset etc. as needed; nothing here cascades through to them.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+/* Commit calendar — structural rules.
+ *
+ * Most of the calendar's structural concerns (legend flex row, swatch
+ * geometry, header layout) live as inline styles on the JSX itself —
+ * an active template fully replaces this stylesheet, and duplicating
+ * structural rules across six templates is fragile. The few rules
+ * below apply only to the headless / no-template path, where this
+ * file *is* the only stylesheet loaded. */
+
+.rg-cal-scroll {
+  /* The SVG is wider than most main columns; let the user scroll
+   * horizontally on small screens rather than shrinking cells (which
+   * would round-off-by-fractional-pixel and look smudged). */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rg-cal-grid {
+  /* Stop the SVG from shrinking under the scroll container — its
+   * intrinsic size is what we care about, not the parent's width. */
+  display: block;
+  max-width: none;
+}

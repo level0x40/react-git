@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # create the "Version Packages" PR + commits + tags
+  pull-requests: write # open + update the "Version Packages" PR
+  id-token: write # npm provenance
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version + publish
+    runs-on: ubuntu-latest
+    # Don't run on forks — they'd hit "no NPM_TOKEN" anyway, but skipping
+    # early keeps the Actions tab clean for fork PR runs.
+    if: github.repository == 'level0x40/react-git'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so changesets can read tag history when
+          # generating the changelog.
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The dual-mode of changesets/action:
+      #
+      # 1. If there are unreleased changeset files in `.changeset/`, the
+      #    action runs `pnpm version` (which calls `changeset version`)
+      #    and opens / updates a "Version Packages" PR with the bumped
+      #    versions and CHANGELOG entries.
+      #
+      # 2. If those changeset files are GONE (because the previous
+      #    Version Packages PR was just merged), the action runs
+      #    `pnpm release` — which is `pnpm publish -r --provenance` —
+      #    and ships the bumped packages to npm with provenance
+      #    attestations. `id-token: write` (granted at the workflow
+      #    level above) is what authenticates the OIDC step npm needs
+      #    to sign the provenance statement.
+      #
+      # Two distinct outcomes, one trigger — same workflow handles both.
+      - name: Create Release Pull Request or publish
+        uses: changesets/action@v1
+        with:
+          version: pnpm version
+          publish: pnpm release
+          commit: "chore: version packages"
+          title: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

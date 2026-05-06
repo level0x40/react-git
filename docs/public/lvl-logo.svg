@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 285 75" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- LVL letter gradients (from lvl2.svg) -->
+    <linearGradient id="lvl-grad-L1" x1="38.9605" y1="50" x2="38.9605" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aaffff"/>
+      <stop offset="0.33" stop-color="#aaffff"/>
+      <stop offset="0.5466" stop-color="#6964ff"/>
+      <stop offset="0.9" stop-color="#8010e1"/>
+      <stop offset="1" stop-color="#ff96ff"/>
+    </linearGradient>
+    <linearGradient id="lvl-grad-V" x1="110" y1="50" x2="110" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aaffff"/>
+      <stop offset="0.33" stop-color="#aaffff"/>
+      <stop offset="0.5466" stop-color="#6964ff"/>
+      <stop offset="0.9" stop-color="#8010e1"/>
+      <stop offset="1" stop-color="#ff96ff"/>
+    </linearGradient>
+    <linearGradient id="lvl-grad-L2" x1="135" y1="50" x2="135" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aaffff"/>
+      <stop offset="0.33" stop-color="#aaffff"/>
+      <stop offset="0.5466" stop-color="#6964ff"/>
+      <stop offset="0.9" stop-color="#8010e1"/>
+      <stop offset="1" stop-color="#ff96ff"/>
+    </linearGradient>
+
+    <!-- LVL drop shadow filters (from lvl2.svg) -->
+    <filter id="shadow-L1" style="color-interpolation-filters:sRGB" x="-0.092" y="-0.064" width="1.183" height="1.127">
+      <feFlood result="flood" flood-opacity="1" flood-color="rgb(0,0,0)"/>
+      <feGaussianBlur result="blur" in="SourceGraphic" stdDeviation="1.719"/>
+      <feOffset result="offset" in="blur" dx="0" dy="0"/>
+      <feComposite result="comp1" operator="in" in="flood" in2="offset"/>
+      <feComposite result="comp2" operator="over" in="SourceGraphic" in2="comp1"/>
+    </filter>
+    <filter id="shadow-V" style="color-interpolation-filters:sRGB" x="-0.078" y="-0.072" width="1.156" height="1.144">
+      <feFlood result="flood" flood-opacity="1" flood-color="rgb(0,0,0)"/>
+      <feGaussianBlur result="blur" in="SourceGraphic" stdDeviation="1.953"/>
+      <feOffset result="offset" in="blur" dx="0" dy="0"/>
+      <feComposite result="comp1" operator="in" in="flood" in2="offset"/>
+      <feComposite result="comp2" operator="over" in="SourceGraphic" in2="comp1"/>
+    </filter>
+    <filter id="shadow-L2" style="color-interpolation-filters:sRGB" x="-0.091" y="-0.064" width="1.183" height="1.127">
+      <feFlood result="flood" flood-opacity="1" flood-color="rgb(0,0,0)"/>
+      <feGaussianBlur result="blur" in="SourceGraphic" stdDeviation="1.724"/>
+      <feOffset result="offset" in="blur" dx="0" dy="0"/>
+      <feComposite result="comp1" operator="in" in="flood" in2="offset"/>
+      <feComposite result="comp2" operator="over" in="SourceGraphic" in2="comp1"/>
+    </filter>
+
+    <!-- CRT scanline pattern (from lvl2.svg) -->
+    <pattern id="scanlines" width="420" height="4" patternUnits="userSpaceOnUse">
+      <rect width="420" height="2" y="0" fill="transparent"/>
+      <rect width="420" height="2" y="2" fill="rgba(0,0,0,0.55)"/>
+    </pattern>
+
+    <!-- Color-matrix filter that forces any rendered content to white
+         while preserving its alpha. Used inside the mask below to
+         convert the colored "0x40" pixel rects into a white silhouette
+         without having to duplicate 110 rect elements. -->
+    <filter id="to-white" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/>
+    </filter>
+
+    <!-- Mask built from a white silhouette of every visible shape in
+         the logo (LVL letter paths + 0x40 pixel art). The scanline
+         overlay below references this mask so the dark bars render
+         ONLY inside shapes — empty SVG space stays untouched on any
+         background color. -->
+    <mask id="lvl-glyph-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="285" height="75">
+      <g fill="white">
+        <g transform="translate(-30, -45)">
+          <path d="M 35.000005,49.999999 V 115 H 80.02045 L 72.623904,94.999997 H 55.000005 V 49.999999 Z"/>
+          <path d="M 60.000001,49.999998 85.000002,115 115,115 134.7697,49.999997 H 114.76969 L 100,94.999997 80.000001,49.999998 Z"/>
+          <path d="m 140.23012,50 19.76988,-10e-7 -12,44.999998 22.91844,-3e-6 V 115 L 120,115 Z"/>
+        </g>
+        <use href="#subtitle-0x40" filter="url(#to-white)"/>
+      </g>
+    </mask>
+  </defs>
+
+  <!-- LVL letter paths (from lvl2.svg, same transform as original coords) -->
+  <g transform="translate(-30, -45)">
+    <path style="fill:url(#lvl-grad-L1);filter:url(#shadow-L1)"
+      d="M 35.000005,49.999999 V 115 H 80.02045 L 72.623904,94.999997 H 55.000005 V 49.999999 Z"/>
+    <path style="fill:url(#lvl-grad-V);filter:url(#shadow-V)"
+      d="M 60.000001,49.999998 85.000002,115 115,115 134.7697,49.999997 H 114.76969 L 100,94.999997 80.000001,49.999998 Z"/>
+    <path style="fill:url(#lvl-grad-L2);filter:url(#shadow-L2)"
+      d="m 140.23012,50 19.76988,-10e-7 -12,44.999998 22.91844,-3e-6 V 115 L 120,115 Z"/>
+  </g>
+
+  <!-- 0x40 C64 pixel text (baseline-aligned with LVL, 90% height) -->
+  <g id="subtitle-0x40" style="transform-origin: 155px 70px" transform="scale(0.5, 0.9)">
+  <g>
+    <rect x="163.36" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="171.71" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="180.07" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="188.43" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="196.79" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="155.00" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="163.36" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="196.79" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="205.14" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="155.00" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="163.36" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="188.43" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="196.79" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="205.14" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="155.00" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="163.36" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="180.07" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="196.79" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="205.14" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="155.00" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="163.36" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="171.71" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="196.79" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="205.14" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="155.00" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="163.36" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="196.79" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="205.14" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="163.36" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="171.71" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="180.07" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="188.43" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="196.79" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="221.86" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="230.21" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="263.64" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="272.00" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="230.21" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="238.57" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="255.29" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="263.64" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="238.57" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="246.93" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="255.29" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="230.21" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="238.57" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="255.29" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="263.64" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="221.86" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="230.21" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="263.64" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="272.00" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="322.14" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="330.50" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="313.79" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="322.14" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="330.50" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="305.43" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="322.14" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="330.50" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="297.07" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="322.14" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="330.50" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="288.71" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="297.07" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="305.43" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="313.79" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="322.14" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="330.50" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="338.86" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="322.14" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="330.50" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="322.14" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="330.50" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="363.93" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="372.29" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="380.64" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="389.00" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="397.36" y="11.50" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="355.57" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="363.93" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="397.36" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="405.71" y="19.86" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="355.57" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="363.93" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="389.00" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="397.36" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="405.71" y="28.21" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="355.57" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="363.93" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="380.64" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="397.36" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="405.71" y="36.57" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="355.57" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="363.93" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="372.29" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="397.36" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="405.71" y="44.93" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="355.57" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="363.93" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="397.36" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="405.71" y="53.29" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="363.93" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="372.29" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="380.64" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="389.00" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+    <rect x="397.36" y="61.64" width="8.36" height="8.36" fill="#6ae8a0" shape-rendering="crispEdges"/>
+  </g>
+  </g>
+
+  <!-- CRT scanlines overlay, clipped to the glyph shapes via
+       #lvl-glyph-mask. Dark bars render only inside LVL letters and
+       the 0x40 pixel art; empty SVG space stays transparent so the
+       logo reads cleanly on any background color. -->
+  <rect width="285" height="75" fill="url(#scanlines)" mask="url(#lvl-glyph-mask)"/>
+</svg>

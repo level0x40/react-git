@@ -1,0 +1,19 @@
+# Dev / build scratch directories that the CLI creates while running.
+# These hold Vite's cache, the bundler's scratch tree, and the
+# extraction manifest — all transient state, never committed and never
+# published (see .npmignore for the publish allowlist).
+.react-git/
+.react-server/
+.vite/
+
+# CLI default `--out` lands here when nobody overrides it.
+dist/
+
+# Workspace-installed deps (also covered by the root .gitignore;
+# repeated here for safety in case this package is ever extracted
+# into a standalone repo).
+node_modules/
+
+# OS / editor / log junk.
+.DS_Store
+*.log

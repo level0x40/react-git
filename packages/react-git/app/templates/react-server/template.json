@@ -1,0 +1,6 @@
+{
+  "name": "react-server",
+  "label": "react-server docs",
+  "description": "Visual coherence with the @lazarv/react-server documentation site. Geist font, react-server cyan accent, prose-first layout with sidebar navigation, doc-style code blocks. Picks up the same typographic rhythm so a react-git deploy reads as a sibling page to the runtime's own docs.",
+  "version": "0.0.0"
+}

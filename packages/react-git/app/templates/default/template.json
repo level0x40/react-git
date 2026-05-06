@@ -1,0 +1,6 @@
+{
+  "name": "default",
+  "label": "Aurora",
+  "description": "Terminal-future / retro-sci-fi: ambient grid background, scanlines, phosphor-glow accents, corner-bracket card frames, monospace chrome. Adapts between a dark blue-black + cyan dark mode and a parchment + amber light mode via prefers-color-scheme.",
+  "version": "0.0.0"
+}

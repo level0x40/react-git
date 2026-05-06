@@ -1,0 +1,420 @@
+/* ==========================================================================
+   @level0x40/react-git docs — minimal Level 0x40-flavoured chrome,
+   centered editorial content body.
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── Brand tokens (Level 0x40 Labs) ─────────────────────────────── */
+  --bg: #000000;
+  --bg-subtle: #08060e;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.06);
+  /* Stronger separator for content-level dividers (<hr>, code/pre
+   * borders, table rows) where 6% white dissolves into the page bg.
+   * The 6% --border is reserved for chrome hairlines (header/footer
+   * border, h2 section breaks) where subtle is the right call. */
+  --rule: rgba(255, 255, 255, 0.18);
+  --text: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-bright: rgba(255, 255, 255, 0.95);
+  --accent-cyan: #60c8ee;
+  --accent-green: #6ae8a0;
+  --accent-orange: #e8a040;
+
+  --font-display: "Press Start 2P", monospace;
+  --font-mono: "Share Tech Mono", monospace;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --measure: 720px;
+
+  /* react-git's tier inside the Level 0x40 palette: orange.
+     Git's identity is orange-ish, and the parent palette already
+     ships a tools-friendly orange. Used for headings/links/hero
+     accent throughout the body content. */
+  --doc-accent: var(--accent-orange);
+  --doc-accent-soft: rgba(232, 160, 64, 0.18);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 16px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+}
+
+/* ==========================================================================
+   Slim brand chrome — just enough to signal "this is a Level 0x40 project."
+   Footer-only: the package title at the top of <main> already announces
+   the package; a header logo on top of that would be redundant. The full
+   Level 0x40 chrome lives at level0x40.com itself.
+   ========================================================================== */
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  transition: filter 0.3s;
+}
+
+.brand-logo:hover {
+  filter: drop-shadow(0 0 12px rgba(106, 232, 160, 0.45));
+}
+
+.brand-logo img {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+.brand-logo--small img {
+  height: 20px;
+  opacity: 0.85;
+}
+
+.brand-footer {
+  margin-top: auto; /* pin to bottom on short pages */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 2.5rem 1.5rem 3rem;
+  border-top: 1px solid var(--border);
+}
+
+.brand-attribution {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.brand-attribution a {
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--border);
+  transition: color 0.2s;
+}
+
+.brand-attribution a:hover {
+  color: var(--text-bright);
+}
+
+.brand-ready {
+  font-family: var(--font-display);
+  font-size: 0.45rem;
+  color: var(--accent-green);
+  letter-spacing: 3px;
+  opacity: 0.5;
+  animation: blink 1.2s step-end infinite;
+}
+
+/* ==========================================================================
+   Centered editorial content. Each top-level MDX block is constrained to
+   a 720px column, centered horizontally via auto margins, and text-aligned
+   center for an editorial feel. Pre / table / list blocks revert to
+   left-align inside their centered containers — centered code/tables/lists
+   are unreadable.
+   ========================================================================== */
+
+main {
+  /* Constrain + center the column on <main> itself rather than each
+   * child individually. Earlier I tried `main > * { margin: 0 auto }`,
+   * but every typography rule declares a `margin:` shorthand
+   * (e.g. `h1 { margin: 0 0 0.85rem }`) which sets margin-left/right
+   * to 0 and silently defeats the auto centering. Centering the
+   * parent is immune to whatever vertical margins the children
+   * declare. Text inside reads left-aligned — standard docs layout. */
+  flex: 1; /* push the footer to the bottom on short pages */
+  width: 100%;
+  max-width: var(--measure);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 4.5rem 1.5rem 5rem;
+}
+
+/* ── Typography ─────────────────────────────────────────────────── */
+
+h1,
+h2,
+h3 {
+  color: var(--text-bright);
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2.4rem;
+  line-height: 1.15;
+  margin: 0 0 0.85rem;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 1.4rem;
+  margin: 4rem 0 1rem;
+  padding-top: 2.25rem;
+  /* Use the same --rule token as <pre>/<code> borders — content-level
+   * dividers all share one opacity so the page doesn't feel like
+   * different rules across different blocks. */
+  border-top: 1px solid var(--rule);
+  line-height: 1.25;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 2.25rem 0 0.5rem;
+}
+
+p {
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+
+strong {
+  color: var(--text-bright);
+  font-weight: 600;
+}
+
+a {
+  color: var(--doc-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition:
+    color 0.2s,
+    text-shadow 0.2s;
+}
+
+a:hover {
+  color: var(--text-bright);
+  text-shadow: 0 0 10px var(--doc-accent-soft);
+}
+
+/* ── Inline + block code ────────────────────────────────────────── */
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 0.05em 0.4em;
+  border-radius: 4px;
+  color: var(--text-bright);
+}
+
+pre {
+  background: var(--bg-subtle);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 1rem 0 1.5rem;
+}
+
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  color: var(--text);
+}
+
+/* ── Horizontal rules ───────────────────────────────────────────── */
+
+hr {
+  /* Same --rule token as <pre>/<code> borders and the h2 section
+   * break above. One opacity for all content-level dividers. */
+  border: 0;
+  height: 1px;
+  background: var(--rule);
+  margin: 2.5rem 0;
+}
+
+/* ── Lists ──────────────────────────────────────────────────────── */
+
+ul,
+ol {
+  padding-left: 1.4rem;
+  margin: 0 0 1rem;
+}
+
+li {
+  margin: 0.3rem 0;
+  color: var(--text);
+}
+
+li::marker {
+  color: var(--text-muted);
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────
+ * Package-title block, copied (typographically) from @lazarv/react-server's
+ * docs landing page. The pattern: tiny @scope handle as a one-line
+ * eyebrow, then the unscoped package name as a huge headline beneath it,
+ * overlapping by -1rem so the two read as a single brand mark. Same
+ * shape as react-server.dev's hero — `@lazarv` over `react-server`. */
+
+.hero {
+  margin: 0 0 3rem;
+}
+
+.hero-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--doc-accent);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin: -1rem 0 0;
+  white-space: nowrap;
+  color: var(--doc-accent);
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 3.75rem;
+  }
+}
+
+.hero-tagline {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin: 1.5rem 0 0;
+  max-width: 60ch;
+  line-height: 1.65;
+}
+
+/* ── Templates grid ─────────────────────────────────────────────── */
+
+.tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tpl-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.95rem 1rem;
+  background: var(--surface);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.tpl-card:hover {
+  border-color: var(--doc-accent);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+
+.tpl-name {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 0.25rem;
+}
+
+.tpl-desc {
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Tables ─────────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+th {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+td {
+  color: var(--text);
+}
+
+td code {
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Mobile breakpoint — tighten the column padding and headings.
+   ========================================================================== */
+@media (max-width: 768px) {
+  .brand-footer {
+    padding: 2rem 1rem 2.5rem;
+  }
+
+  main {
+    padding: 2.75rem 1.25rem 3.5rem;
+  }
+
+  h1 {
+    font-size: 1.85rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    margin: 3rem 0 0.85rem;
+    padding-top: 1.75rem;
+  }
+}

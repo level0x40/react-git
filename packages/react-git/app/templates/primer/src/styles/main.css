@@ -1,0 +1,1271 @@
+/* primer — GitHub-evocative theme using Primer design tokens.
+ *
+ * Aim: *evocative*, not pixel-parity. Anyone who's spent time in
+ * github.com should feel "oh, this looks like GitHub" within the
+ * first second; pixel-matching the latest GitHub redesign is a
+ * losing battle and not the point.
+ *
+ * Token sources: github/primer/primitives v8 (color values inlined
+ * here so we don't pull a dependency). Tokens are the *current*
+ * Primer light + dark palettes as of late 2024 — they shift
+ * occasionally; pin them rather than chase the upstream changes.
+ *
+ * Layout decisions:
+ *   - System font stack matches GitHub's. 14px base, 1.5 line-height.
+ *   - 6px border-radius is the Primer rounding default.
+ *   - Sticky top header (.rg-hud restyled to bg-canvas + border-
+ *     bottom). Bottom statusbar from the layout DOM is hidden — GitHub
+ *     doesn't have one; faking it would be off-brand.
+ *   - Ambient grid divs hidden — pure decoration we don't want.
+ *   - Light mode default; dark mode via prefers-color-scheme.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Primer light tokens */
+  --canvas-default: #ffffff;
+  --canvas-subtle: #f6f8fa;
+  --canvas-inset: #f6f8fa;
+  --canvas-overlay: #ffffff;
+
+  --fg-default: #1f2328;
+  --fg-muted: #59636e;
+  --fg-subtle: #6e7781;
+  --fg-on-emphasis: #ffffff;
+
+  --border-default: #d0d7de;
+  --border-muted: #d8dee4;
+  --border-subtle: rgba(31, 35, 40, 0.15);
+
+  --accent-fg: #0969da;
+  --accent-emphasis: #0969da;
+  --accent-muted: rgba(9, 105, 218, 0.4);
+  --accent-subtle: #ddf4ff;
+
+  --success-fg: #1a7f37;
+  --success-emphasis: #1f883d;
+  --success-subtle: #dafbe1;
+
+  --attention-fg: #9a6700;
+  --attention-emphasis: #9a6700;
+  --attention-subtle: #fff8c5;
+
+  --danger-fg: #d1242f;
+  --danger-emphasis: #cf222e;
+  --danger-subtle: #ffebe9;
+
+  --done-fg: #8250df;
+  --done-subtle: #fbefff;
+
+  --neutral-emphasis-plus: #1f2328;
+  --neutral-emphasis: #59636e;
+  --neutral-muted: rgba(175, 184, 193, 0.2);
+  --neutral-subtle: #eaeef2;
+
+  /* Diff line tints (Primer's diffstat hues) */
+  --diff-add-bg: #dafbe1;
+  --diff-add-bg-strong: #aceebb;
+  --diff-rem-bg: #ffebe9;
+  --diff-rem-bg-strong: #ffcecb;
+
+  /* Typography */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Sizing */
+  --radius: 6px;
+  --shadow-resting: 0 1px 0 rgba(31, 35, 40, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas-default: #0d1117;
+    --canvas-subtle: #151b23;
+    --canvas-inset: #010409;
+    --canvas-overlay: #151b23;
+
+    --fg-default: #e6edf3;
+    --fg-muted: #9198a1;
+    --fg-subtle: #6e7681;
+    --fg-on-emphasis: #ffffff;
+
+    --border-default: #3d444d;
+    --border-muted: #30363d;
+    --border-subtle: rgba(240, 246, 252, 0.1);
+
+    --accent-fg: #4493f8;
+    --accent-emphasis: #1f6feb;
+    --accent-muted: rgba(56, 139, 253, 0.4);
+    --accent-subtle: #051d4d;
+
+    --success-fg: #3fb950;
+    --success-emphasis: #238636;
+    --success-subtle: #033a16;
+
+    --attention-fg: #d29922;
+    --attention-emphasis: #9e6a03;
+    --attention-subtle: #341a00;
+
+    --danger-fg: #f85149;
+    --danger-emphasis: #da3633;
+    --danger-subtle: #67060c;
+
+    --done-fg: #ab7df8;
+    --done-subtle: #2e1a47;
+
+    --neutral-emphasis-plus: #f0f6fc;
+    --neutral-emphasis: #6e7681;
+    --neutral-muted: rgba(110, 118, 129, 0.4);
+    --neutral-subtle: rgba(110, 118, 129, 0.1);
+
+    --diff-add-bg: #14261c;
+    --diff-add-bg-strong: #1a4327;
+    --diff-rem-bg: #2d1216;
+    --diff-rem-bg-strong: #5a1c20;
+
+    --shadow-resting: 0 0 transparent;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--canvas-default);
+  color: var(--fg-default);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--accent-fg);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 85%;
+  padding: 0.2em 0.4em;
+  background: var(--neutral-muted);
+  border-radius: var(--radius);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: 85%;
+  margin: 0;
+  padding: 16px;
+  background: var(--canvas-subtle);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  line-height: 1.45;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* ── App shell ───────────────────────────────────────────────── */
+
+.rg-ambient,
+.rg-ambient-grid,
+.rg-ambient-scan,
+.rg-ambient-glow {
+  display: none;
+}
+
+.rg-app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* HUD = sticky top header, GitHub-style: brand + nav + status row */
+.rg-hud {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  margin: 0 -24px;
+  padding-left: 24px;
+  padding-right: 24px;
+  background: var(--canvas-default);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.rg-hud-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-default);
+  text-decoration: none;
+  font-weight: 600;
+}
+.rg-hud-brand:hover {
+  text-decoration: none;
+  color: var(--accent-fg);
+}
+
+.rg-hud-brand-mark {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: var(--fg-default);
+  border-radius: 3px;
+}
+
+.rg-hud-brand-name {
+  font-size: 16px;
+}
+
+.rg-hud-brand-sha {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--neutral-muted);
+  color: var(--fg-muted);
+  padding: 3px 8px;
+  border-radius: 20px;
+  text-decoration: none;
+}
+.rg-hud-brand-sha:hover {
+  background: var(--accent-subtle);
+  color: var(--accent-fg);
+}
+
+.rg-hud-nav {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.rg-hud-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  color: var(--fg-default);
+  text-decoration: none;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 14px;
+}
+.rg-hud-nav a:hover {
+  background: var(--neutral-muted);
+  text-decoration: none;
+}
+
+.rg-hud-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.rg-hud-status-mode {
+  background: var(--accent-subtle);
+  color: var(--accent-fg);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.rg-hud-status-sep,
+.rg-hud-status-cursor {
+  display: none;
+}
+
+.rg-hud-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--success-fg);
+  border-radius: 50%;
+}
+
+.rg-hud-status-label {
+  color: var(--fg-muted);
+}
+
+/* Statusbar — GitHub doesn't have one; hide it. */
+.rg-statusbar {
+  display: none;
+}
+
+/* ── Stage / pages ───────────────────────────────────────────── */
+
+.rg-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 32px;
+}
+
+.rg-overview,
+.rg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rg-header {
+  border-bottom: 1px solid var(--border-default);
+  padding-bottom: 16px;
+}
+
+.rg-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--fg-default);
+}
+
+.rg-description {
+  margin: 4px 0 0;
+  color: var(--fg-muted);
+  font-size: 16px;
+}
+
+.rg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 12px 0 0;
+}
+.rg-meta > div {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.rg-meta dt {
+  color: var(--fg-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.rg-meta dd {
+  margin: 0;
+}
+
+.rg-section {
+  margin: 0;
+}
+.rg-section h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg-default);
+}
+
+/* Crumbs */
+.rg-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+.rg-crumbs > a {
+  color: var(--accent-fg);
+}
+.rg-crumbs > span[aria-hidden="true"] {
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+
+.rg-ref-name {
+  color: var(--fg-default);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  background: var(--neutral-muted);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  font-weight: 500;
+}
+
+.rg-crumbs-leaf {
+  color: var(--fg-default);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Errors / notices */
+.rg-error {
+  padding: 12px 16px;
+  background: var(--danger-subtle);
+  border: 1px solid var(--danger-emphasis);
+  border-radius: var(--radius);
+  color: var(--danger-fg);
+}
+
+.rg-static-notice {
+  padding: 12px 16px;
+  background: var(--attention-subtle);
+  border: 1px solid var(--attention-emphasis);
+  border-radius: var(--radius);
+  color: var(--attention-fg);
+  font-size: 13px;
+}
+
+.rg-muted-inline {
+  color: var(--fg-muted);
+}
+.rg-arrow {
+  color: var(--fg-muted);
+}
+.rg-add {
+  color: var(--success-fg);
+  font-weight: 600;
+}
+.rg-rem {
+  color: var(--danger-fg);
+  font-weight: 600;
+}
+
+/* SHA chips — Primer "Label" component shape */
+.rg-sha {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--neutral-muted);
+  color: var(--fg-default);
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+.rg-commit-link {
+  color: inherit;
+  text-decoration: none;
+}
+.rg-commit-link:hover {
+  color: var(--accent-fg);
+  text-decoration: none;
+}
+
+/* ── File browser ────────────────────────────────────────────── */
+
+.rg-tree {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  background: var(--canvas-default);
+  overflow: hidden;
+}
+.rg-tree thead {
+  background: var(--canvas-subtle);
+  border-bottom: 1px solid var(--border-muted);
+}
+.rg-tree thead th {
+  padding: 8px 16px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+
+.rg-tree-row {
+  border-bottom: 1px solid var(--border-muted);
+}
+.rg-tree-row:last-child {
+  border-bottom: none;
+}
+.rg-tree-row td {
+  padding: 6px 16px;
+}
+.rg-tree-row:hover {
+  background: var(--canvas-subtle);
+}
+
+.rg-tree-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-default);
+  text-decoration: none;
+}
+.rg-tree-name:hover {
+  color: var(--accent-fg);
+  text-decoration: underline;
+}
+
+.rg-tree-up .rg-tree-name {
+  color: var(--fg-muted);
+}
+.rg-tree-submodule {
+  color: var(--fg-muted);
+}
+.rg-tree-static {
+  color: var(--fg-muted);
+}
+
+.rg-tree-size {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+/* ── Glyph (icon) ─────────────────────────────────────────────── */
+
+.rg-glyph {
+  flex: none;
+}
+
+/* ── Blob view ───────────────────────────────────────────────── */
+
+.rg-blob {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  background: var(--canvas-default);
+  overflow: hidden;
+}
+
+.rg-blob-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--canvas-subtle);
+  border-bottom: 1px solid var(--border-muted);
+}
+
+.rg-blob-path {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.rg-blob-meta {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.rg-blob-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-muted);
+  background: var(--canvas-default);
+}
+
+.rg-blob-content {
+  padding: 0;
+}
+.rg-blob-content-markdown {
+  padding: 24px 32px;
+  background: var(--canvas-default);
+}
+.rg-blob-content-media {
+  padding: 24px;
+  text-align: center;
+}
+.rg-blob-content-media img,
+.rg-blob-content-media video,
+.rg-blob-content-media audio {
+  max-width: 100%;
+  border-radius: var(--radius);
+}
+.rg-blob-content-rawmeta {
+  padding: 16px 24px;
+}
+
+.rg-blob-rawmeta-line {
+  margin: 0 0 12px;
+  color: var(--fg-muted);
+}
+.rg-blob-rawmeta-label {
+  color: var(--fg-default);
+  font-weight: 600;
+}
+.rg-blob-rawmeta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 0;
+}
+.rg-blob-rawmeta dt {
+  color: var(--fg-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.rg-blob-rawmeta dd {
+  margin: 0;
+}
+
+.rg-blob-empty {
+  padding: 32px;
+  color: var(--fg-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+.rg-blob-fallback {
+  margin: 0;
+  background: var(--canvas-subtle);
+  font-size: 12px;
+  border-radius: 0;
+  padding: 16px;
+  border: none;
+}
+
+/* Blob view toggle / diff toggle — Primer SegmentedControl */
+.rg-blob-view-toggle,
+.rg-diff-toggle {
+  display: inline-flex;
+  background: var(--canvas-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  padding: 2px;
+  gap: 0;
+}
+
+.rg-blob-view-btn,
+.rg-diff-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--fg-muted);
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: calc(var(--radius) - 2px);
+}
+.rg-blob-view-btn:hover,
+.rg-diff-toggle-btn:hover {
+  color: var(--fg-default);
+}
+.rg-blob-view-btn.is-active,
+.rg-diff-toggle-btn.is-active {
+  background: var(--canvas-default);
+  color: var(--fg-default);
+  font-weight: 600;
+  box-shadow: var(--shadow-resting);
+}
+
+/* ── Prose (rendered markdown) ───────────────────────────────── */
+
+.rg-prose {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.rg-prose h1,
+.rg-prose h2,
+.rg-prose h3,
+.rg-prose h4,
+.rg-prose h5,
+.rg-prose h6 {
+  margin: 24px 0 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.rg-prose h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-muted);
+  padding-bottom: 0.3em;
+}
+.rg-prose h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-muted);
+  padding-bottom: 0.3em;
+}
+.rg-prose h3 {
+  font-size: 1.25em;
+}
+.rg-prose h4 {
+  font-size: 1em;
+}
+.rg-prose h5 {
+  font-size: 0.875em;
+}
+.rg-prose h6 {
+  font-size: 0.85em;
+  color: var(--fg-muted);
+}
+.rg-prose p {
+  margin: 0 0 16px;
+}
+.rg-prose ul,
+.rg-prose ol {
+  margin: 0 0 16px;
+  padding-left: 2em;
+}
+.rg-prose li {
+  margin: 0.25em 0;
+}
+.rg-prose blockquote {
+  margin: 0 0 16px;
+  padding: 0 1em;
+  color: var(--fg-muted);
+  border-left: 4px solid var(--border-default);
+}
+.rg-prose hr {
+  border: 0;
+  border-top: 1px solid var(--border-muted);
+  margin: 24px 0;
+}
+.rg-prose img {
+  max-width: 100%;
+  border-radius: var(--radius);
+}
+.rg-prose pre {
+  margin: 16px 0;
+}
+.rg-prose code {
+  font-size: 85%;
+}
+.rg-prose pre code {
+  background: transparent;
+  padding: 0;
+}
+.rg-prose table {
+  margin: 16px 0;
+  display: block;
+  overflow: auto;
+}
+.rg-prose table th,
+.rg-prose table td {
+  padding: 6px 13px;
+  border: 1px solid var(--border-default);
+}
+.rg-prose table tr:nth-child(2n) {
+  background: var(--canvas-subtle);
+}
+
+/* Shiki containers — neutralize Shiki's own bg, use Primer canvas-subtle */
+.rg-shiki-host {
+  font-size: 12px;
+}
+.rg-shiki-host pre.shiki {
+  background: var(--canvas-subtle) !important;
+  color: var(--fg-default);
+  padding: 16px;
+  border-radius: 0;
+}
+.rg-shiki-line {
+  font-family: var(--font-mono);
+  font-size: inherit;
+}
+
+/* Multi-chunk Shiki blocks — see comment in default template. The
+ * BlobView wraps each chunk in a `<div>` child of `.rg-shiki-host`;
+ * make consecutive chunks merge into one continuous code block by
+ * stripping inner edges. Primer keeps no border/radius on its pre
+ * (canvas-subtle bg only) so most properties below are defensive,
+ * but `margin` and `box-shadow` resets still matter if a theme
+ * customization adds them later. */
+.rg-shiki-host > div:not(:first-child) > pre.shiki {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.rg-shiki-host > div:not(:last-child) > pre.shiki {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  box-shadow: none;
+}
+
+/* Shiki dual-theme color swap — Shiki 4.x emits both themes' colors
+ * on every span and renders the LIGHT theme by default. In dark
+ * mode, promote the `--shiki-dark` variables to active so syntax
+ * tokens flip to the dark palette. The pre's bg stays pinned to
+ * `--canvas-subtle` (Primer canvas), so we don't swap span bg here. */
+@media (prefers-color-scheme: dark) {
+  .rg-shiki-host pre.shiki,
+  .rg-shiki-host pre.shiki span,
+  .rg-shiki-line,
+  .rg-shiki-line span {
+    color: var(--shiki-dark) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}
+
+/* ── Diff view ───────────────────────────────────────────────── */
+
+.rg-diff-files {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rg-diff {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  background: var(--canvas-default);
+  overflow: hidden;
+}
+
+.rg-diff-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--canvas-subtle);
+  border-bottom: 1px solid var(--border-muted);
+  font-size: 13px;
+}
+
+.rg-diff-path {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+.rg-diff-path-link {
+  color: var(--accent-fg);
+  text-decoration: none;
+}
+.rg-diff-path-link:hover {
+  text-decoration: underline;
+}
+
+.rg-diff-stats {
+  display: inline-flex;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* File mode badges (A/D/M/R/C) — Primer "StateLabel" shape */
+.rg-file-badge {
+  display: inline-block;
+  width: 22px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 1px 0;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+}
+.rg-file-badge-added {
+  background: var(--success-subtle);
+  color: var(--success-fg);
+}
+.rg-file-badge-deleted {
+  background: var(--danger-subtle);
+  color: var(--danger-fg);
+}
+.rg-file-badge-modified {
+  background: var(--attention-subtle);
+  color: var(--attention-fg);
+}
+.rg-file-badge-renamed {
+  background: var(--done-subtle);
+  color: var(--done-fg);
+}
+.rg-file-badge-copied {
+  background: var(--accent-subtle);
+  color: var(--accent-fg);
+}
+
+.rg-diff-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-muted);
+}
+
+/* Diff hunks */
+.rg-hunks {
+  padding: 0;
+}
+.rg-hunk {
+  border-top: 1px solid var(--border-muted);
+}
+.rg-hunk:first-child {
+  border-top: none;
+}
+
+.rg-hunk-header {
+  background: var(--accent-subtle);
+  color: var(--accent-fg);
+  padding: 4px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.rg-hunk-range {
+  font-weight: 600;
+}
+.rg-hunk-context {
+  margin-left: 16px;
+  color: var(--fg-muted);
+}
+
+.rg-hunk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.rg-hunk-table td {
+  padding: 0 8px;
+  vertical-align: top;
+}
+
+.rg-ln {
+  text-align: right;
+  width: 50px;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--fg-muted);
+  background: var(--canvas-default);
+  border-right: 1px solid var(--border-muted);
+}
+
+.rg-line-marker {
+  width: 16px;
+  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--fg-muted);
+}
+
+.rg-line-text {
+  white-space: pre;
+}
+
+.rg-line-add {
+  background: var(--diff-add-bg);
+}
+.rg-line-add .rg-line-marker,
+.rg-line-add .rg-ln-new {
+  color: var(--success-fg);
+}
+.rg-line-add .rg-line-text {
+  background: transparent;
+}
+
+.rg-line-remove {
+  background: var(--diff-rem-bg);
+}
+.rg-line-remove .rg-line-marker,
+.rg-line-remove .rg-ln-old {
+  color: var(--danger-fg);
+}
+
+.rg-line-context {
+  background: transparent;
+}
+
+/* Split-view diff */
+.rg-hunk-split-table {
+  table-layout: fixed;
+}
+.rg-split-cell {
+  padding: 0 8px;
+  vertical-align: top;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rg-split-add {
+  background: var(--diff-add-bg);
+}
+.rg-split-remove {
+  background: var(--diff-rem-bg);
+}
+.rg-split-context {
+  background: transparent;
+}
+.rg-split-empty {
+  background: var(--canvas-subtle);
+}
+
+/* Diff summary — `<section><header>…</header><ul>…</ul></section>`.
+ * `.rg-diff-summary` is the section container, NOT the list itself;
+ * the inner `<ul>` needs its own reset and the `<header>` needs an
+ * explicit flex layout so "X files changed" + the totals align. */
+.rg-diff-summary {
+  margin: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  background: var(--canvas-default);
+  overflow: hidden;
+}
+.rg-diff-summary > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-muted);
+  background: var(--canvas-subtle);
+}
+.rg-diff-summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rg-diff-summary li {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.rg-diff-summary li:last-child {
+  border-bottom: none;
+}
+.rg-diff-summary li:hover {
+  background: var(--canvas-subtle);
+}
+.rg-diff-summary a {
+  /* inline-flex so FileBadge + FileIcon + path align on one row;
+   * `min-width: 0` so a long path can shrink instead of pushing the
+   * stats column off the right edge. */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  color: var(--accent-fg);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.rg-diff-summary a:hover {
+  text-decoration: underline;
+}
+
+.rg-diff-summary-stats {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.rg-diff-summary-count {
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+/* ── Commit list ─────────────────────────────────────────────── */
+
+.rg-commit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  background: var(--canvas-default);
+  overflow: hidden;
+}
+
+.rg-commit {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-muted);
+  align-items: center;
+}
+.rg-commit:last-child {
+  border-bottom: none;
+}
+.rg-commit:hover {
+  background: var(--canvas-subtle);
+}
+
+.rg-subject {
+  color: var(--fg-default);
+}
+
+.rg-author {
+  color: var(--fg-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.rg-commit time {
+  color: var(--fg-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Commit detail page ──────────────────────────────────────── */
+
+.rg-commit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  background: var(--canvas-default);
+}
+
+.rg-commit-subject {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fg-default);
+}
+
+.rg-commit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+.rg-commit-body {
+  margin: 0;
+  font-size: 14px;
+}
+
+.rg-ref-head-badge {
+  display: inline-block;
+  background: var(--success-subtle);
+  color: var(--success-fg);
+  padding: 1px 8px;
+  font-weight: 600;
+  font-size: 11px;
+  border-radius: 20px;
+  margin-left: 6px;
+  border: 1px solid var(--success-emphasis);
+}
+
+/* ── Commit calendar ────────────────────────────────────────────── */
+
+.rg-cal {
+  margin: 24px 0;
+}
+
+.rg-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rg-cal-heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg-default);
+  margin: 0;
+}
+
+.rg-cal-legend {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.rg-cal-legend-cell {
+  border: 1px solid var(--border-subtle);
+}
+
+.rg-cal-day-label,
+.rg-cal-month-label {
+  font-size: 9px;
+  fill: var(--fg-muted);
+}
+
+.rg-cal-cell {
+  stroke: var(--border-subtle);
+  stroke-width: 0.5;
+}
+
+/* GitHub's calendar palette, light mode. */
+.rg-cal-l0 {
+  fill: #ebedf0;
+}
+.rg-cal-l1 {
+  fill: #9be9a8;
+}
+.rg-cal-l2 {
+  fill: #40c463;
+}
+.rg-cal-l3 {
+  fill: #30a14e;
+}
+.rg-cal-l4 {
+  fill: #216e39;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rg-cal-l0 {
+    fill: #161b22;
+  }
+  .rg-cal-l1 {
+    fill: #0e4429;
+  }
+  .rg-cal-l2 {
+    fill: #006d32;
+  }
+  .rg-cal-l3 {
+    fill: #26a641;
+  }
+  .rg-cal-l4 {
+    fill: #39d353;
+  }
+}

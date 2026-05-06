@@ -1,0 +1,2652 @@
+/* ──────────────────────────────────────────────────────────────────
+ * react-git generated app — design system
+ *
+ * Aesthetic: terminal-future. Retro-modern sci-fi UI: ambient grid
+ * background, scanlines, phosphor-glow accent, corner-bracket card
+ * frames, monospace chrome, micro-animations. Reads as a HUD over
+ * the page bg without burying content under decoration.
+ *
+ * Theme: system-driven (prefers-color-scheme). Both modes are
+ * coherent retro-future variants:
+ *   - Dark (primary): deep blue-black bg + phosphor cyan accent
+ *     with soft glow. The "CRT terminal in 2080" vibe.
+ *   - Light (alt):    warm parchment + burnt-amber accent. The
+ *     "telex printout / dot-matrix" vibe.
+ *
+ * Type: Geist Mono is the *chrome* typeface (nav, meta, headings,
+ * tables — anything structural). Geist Sans handles long-form prose
+ * (descriptions, body copy). Mono is doing most of the visual work
+ * deliberately — sci-fi reads as monospace.
+ *
+ * Effects:
+ *   - Ambient: animated SVG-like grid drift + scanline drift +
+ *     radial accent halo.
+ *   - Cards: hairline borders + corner brackets at TL/BR via
+ *     pseudo-elements; hover adds accent border-glow.
+ *   - Headings: bracketed "▮ COMMITS ──── " visual prefix + trailing
+ *     hairline rule via ::before/::after.
+ *   - Stagger fade-in on first paint via animation-delay (`:nth-child`).
+ *   - Cursor blink in title + status bar.
+ *   - prefers-reduced-motion: all animations collapse to none.
+ * ────────────────────────────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&display=swap");
+
+/* ── Design tokens ─────────────────────────────────────────────── */
+
+:root {
+  /* Color — light theme (parchment + amber) */
+  --rg-bg: #f4ede0;
+  --rg-bg-elevated: #fbf6e9;
+  --rg-surface: #fbf6e9;
+  --rg-surface-2: #ebe2cc;
+  --rg-surface-hover: #efe6d2;
+  --rg-surface-active: #e3d8bb;
+  --rg-fg: #1a1612;
+  --rg-fg-2: #3a3128;
+  --rg-fg-muted: #6e604f;
+  --rg-fg-subtle: #a8967c;
+  --rg-rule: #d6c9ad;
+  --rg-rule-strong: #c2b290;
+  --rg-rule-faint: #e3d8bb;
+
+  --rg-accent: #c75a1a;
+  --rg-accent-hover: #a44715;
+  --rg-accent-fg: #fbf6e9;
+  --rg-accent-bg: rgba(199, 90, 26, 0.08);
+  --rg-accent-bg-strong: rgba(199, 90, 26, 0.16);
+  --rg-accent-border: rgba(199, 90, 26, 0.32);
+  --rg-accent-glow: 0 0 0 transparent;
+  --rg-focus-ring: rgba(199, 90, 26, 0.45);
+
+  /* Diff add/remove */
+  --rg-add: #2e6b1f;
+  --rg-add-bg: rgba(74, 142, 38, 0.1);
+  --rg-add-bg-strong: rgba(74, 142, 38, 0.2);
+  --rg-add-border: rgba(74, 142, 38, 0.32);
+  --rg-add-marker: #3f8a25;
+
+  --rg-rem: #a83232;
+  --rg-rem-bg: rgba(168, 50, 50, 0.08);
+  --rg-rem-bg-strong: rgba(168, 50, 50, 0.18);
+  --rg-rem-border: rgba(168, 50, 50, 0.32);
+  --rg-rem-marker: #b03838;
+
+  --rg-modified-fg: #8a5a14;
+  --rg-modified-bg: rgba(138, 90, 20, 0.1);
+  --rg-renamed-fg: #6a4ca8;
+  --rg-renamed-bg: rgba(106, 76, 168, 0.1);
+
+  /* Code surface bg — matches Shiki `github-light` pre bg (#ffffff).
+     The `.rg-blob-content` outer container paints this color so
+     its padding area sits flush with the inline <pre>; if Shiki
+     ever stops emitting this exact bg, update here too. */
+  --rg-code-bg: #ffffff;
+
+  /* HUD/statusbar surface */
+  --rg-hud-bg: rgba(244, 237, 224, 0.85);
+  --rg-hud-border: rgba(26, 22, 18, 0.12);
+
+  /* Ambient layer — light mode dials these way down */
+  --rg-grid-color: rgba(26, 22, 18, 0.04);
+  --rg-grid-size: 32px;
+  --rg-scan-color: rgba(26, 22, 18, 0.025);
+  --rg-halo-color: rgba(199, 90, 26, 0.06);
+
+  /* Card top-edge inset (no light-mode highlight needed) */
+  --rg-card-inset: none;
+  --rg-card-corner: var(--rg-accent);
+
+  /* Typography */
+  --rg-font-sans:
+    "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --rg-font-mono:
+    "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+
+  /* Type scale */
+  --rg-fs-10: 0.625rem;
+  --rg-fs-11: 0.6875rem;
+  --rg-fs-12: 0.75rem;
+  --rg-fs-13: 0.8125rem;
+  --rg-fs-14: 0.875rem;
+  --rg-fs-15: 0.9375rem;
+  --rg-fs-16: 1rem;
+  --rg-fs-18: 1.125rem;
+  --rg-fs-20: 1.25rem;
+  --rg-fs-24: 1.5rem;
+  --rg-fs-30: 1.875rem;
+  --rg-fs-36: 2.25rem;
+  --rg-fs-48: 3rem;
+
+  /* Spacing — 4px scale */
+  --rg-sp-1: 0.25rem;
+  --rg-sp-2: 0.5rem;
+  --rg-sp-3: 0.75rem;
+  --rg-sp-4: 1rem;
+  --rg-sp-5: 1.25rem;
+  --rg-sp-6: 1.5rem;
+  --rg-sp-8: 2rem;
+  --rg-sp-10: 2.5rem;
+  --rg-sp-12: 3rem;
+  --rg-sp-16: 4rem;
+  --rg-sp-20: 5rem;
+
+  /* Radii — flatter, more terminal-like */
+  --rg-r-sm: 2px;
+  --rg-r-md: 4px;
+  --rg-r-lg: 6px;
+  --rg-r-pill: 999px;
+
+  /* Elevation */
+  --rg-shadow-sm: 0 1px 0 rgba(26, 22, 18, 0.06);
+  --rg-shadow-md: 0 1px 2px rgba(26, 22, 18, 0.08), 0 8px 24px rgba(26, 22, 18, 0.04);
+
+  /* Motion */
+  --rg-ease: cubic-bezier(0.2, 0, 0, 1);
+  --rg-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --rg-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --rg-dur-fast: 90ms;
+  --rg-dur-base: 180ms;
+  --rg-dur-slow: 360ms;
+  --rg-dur-glacial: 9000ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Color — dark theme (deep blue-black + phosphor cyan) */
+    --rg-bg: #060a0d;
+    --rg-bg-elevated: #0a1015;
+    --rg-surface: #0c131a;
+    --rg-surface-2: #11191f;
+    --rg-surface-hover: #15202a;
+    --rg-surface-active: #1d2c38;
+    --rg-fg: #d8eee5;
+    --rg-fg-2: #a3bfb6;
+    --rg-fg-muted: #6c8a93;
+    --rg-fg-subtle: #3d525c;
+    --rg-rule: #1a242c;
+    --rg-rule-strong: #243038;
+    --rg-rule-faint: #11181e;
+
+    --rg-accent: #00ffd5;
+    --rg-accent-hover: #5affe1;
+    --rg-accent-fg: #06090b;
+    --rg-accent-bg: rgba(0, 255, 213, 0.07);
+    --rg-accent-bg-strong: rgba(0, 255, 213, 0.16);
+    --rg-accent-border: rgba(0, 255, 213, 0.32);
+    --rg-accent-glow: 0 0 14px rgba(0, 255, 213, 0.45);
+    --rg-focus-ring: rgba(0, 255, 213, 0.45);
+
+    --rg-add: #6effa0;
+    --rg-add-bg: rgba(110, 255, 160, 0.08);
+    --rg-add-bg-strong: rgba(110, 255, 160, 0.2);
+    --rg-add-border: rgba(110, 255, 160, 0.32);
+    --rg-add-marker: #6effa0;
+
+    --rg-rem: #ff6b8a;
+    --rg-rem-bg: rgba(255, 107, 138, 0.08);
+    --rg-rem-bg-strong: rgba(255, 107, 138, 0.2);
+    --rg-rem-border: rgba(255, 107, 138, 0.32);
+    --rg-rem-marker: #ff6b8a;
+
+    --rg-modified-fg: #ffce5e;
+    --rg-modified-bg: rgba(255, 206, 94, 0.1);
+    --rg-renamed-fg: #b894ff;
+    --rg-renamed-bg: rgba(184, 148, 255, 0.1);
+
+    /* Matches Shiki `github-dark-dimmed` pre bg (#22272e). */
+    --rg-code-bg: #22272e;
+
+    --rg-hud-bg: rgba(6, 10, 13, 0.72);
+    --rg-hud-border: rgba(0, 255, 213, 0.16);
+
+    --rg-grid-color: rgba(0, 255, 213, 0.045);
+    --rg-grid-size: 32px;
+    --rg-scan-color: rgba(0, 255, 213, 0.025);
+    --rg-halo-color: rgba(0, 255, 213, 0.1);
+
+    /* Card top-edge highlight — implies "lit from above" */
+    --rg-card-inset: inset 0 1px 0 rgba(0, 255, 213, 0.06);
+    --rg-card-corner: var(--rg-accent);
+
+    --rg-shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
+    --rg-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ── Reset + base ──────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--rg-bg);
+  color: var(--rg-fg);
+  font-family: var(--rg-font-sans);
+  font-size: var(--rg-fs-15);
+  line-height: 1.55;
+  font-feature-settings: "ss01", "ss03", "cv11";
+  font-variant-numeric: tabular-nums;
+  /* Reserve space for the fixed status bar at the bottom so content
+     never sits underneath. */
+  padding-bottom: 36px;
+}
+
+a {
+  color: var(--rg-accent);
+  text-decoration: none;
+  transition: color var(--rg-dur-fast) var(--rg-ease);
+}
+
+a:hover {
+  color: var(--rg-accent-hover);
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--rg-accent-bg-strong);
+  color: var(--rg-fg);
+}
+
+:focus-visible {
+  outline: 1px solid var(--rg-focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--rg-r-sm);
+}
+
+/* ── Ambient layer (full-bleed, fixed, decorative) ─────────────── */
+
+.rg-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rg-ambient-grid {
+  position: absolute;
+  inset: -2px;
+  background-image:
+    linear-gradient(to right, var(--rg-grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rg-grid-color) 1px, transparent 1px);
+  background-size: var(--rg-grid-size) var(--rg-grid-size);
+  background-position: 0 0;
+  /* Vignette via mask: dim the edges so the grid feels "viewed
+     through" something rather than being a flat tiled surface. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 30%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 30%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  animation: rg-grid-drift 60s linear infinite;
+}
+
+.rg-ambient-scan {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    var(--rg-scan-color) 2px,
+    var(--rg-scan-color) 3px
+  );
+  opacity: 0.6;
+  animation: rg-scan-drift 8s linear infinite;
+}
+
+.rg-ambient-glow {
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  width: 1200px;
+  height: 800px;
+  margin-left: -600px;
+  background: radial-gradient(50% 50% at 50% 50%, var(--rg-halo-color) 0%, transparent 70%);
+  pointer-events: none;
+  animation: rg-glow-pulse 12s ease-in-out infinite;
+}
+
+@keyframes rg-grid-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: var(--rg-grid-size) var(--rg-grid-size);
+  }
+}
+
+@keyframes rg-scan-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 100px;
+  }
+}
+
+@keyframes rg-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(0, 30px, 0);
+  }
+}
+
+/* ── App shell ─────────────────────────────────────────────────── */
+
+.rg-app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--rg-sp-6) var(--rg-sp-12);
+  position: relative;
+}
+
+/* ── Top HUD ───────────────────────────────────────────────────── */
+
+.rg-hud {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--rg-sp-4);
+  margin: 0 calc(-1 * var(--rg-sp-6)) var(--rg-sp-10);
+  padding: var(--rg-sp-3) var(--rg-sp-6);
+  background: var(--rg-hud-bg);
+  border-bottom: 1px solid var(--rg-hud-border);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+  letter-spacing: 0.02em;
+}
+
+.rg-hud::before {
+  /* Bottom hairline glow — accent runs along under the nav,
+     cyan-phosphor in dark, amber in light. */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--rg-accent-border) 25%,
+    var(--rg-accent-border) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.rg-hud-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  color: var(--rg-fg);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  flex: none;
+}
+
+.rg-hud-brand:hover {
+  color: var(--rg-accent);
+}
+
+.rg-hud-brand-mark {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: var(--rg-accent);
+  box-shadow: var(--rg-accent-glow);
+  /* Diagonal seam via clip-path — feels structural, not pictorial. */
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+  animation: rg-mark-pulse 2.4s var(--rg-ease) infinite;
+}
+
+@keyframes rg-mark-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.92);
+    opacity: 0.85;
+  }
+}
+
+.rg-hud-brand-name {
+  font-size: var(--rg-fs-13);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.rg-hud-brand-sha {
+  margin-left: var(--rg-sp-2);
+  padding: 1px 6px;
+  font-size: var(--rg-fs-10);
+  letter-spacing: 0.08em;
+  color: var(--rg-accent);
+  background: var(--rg-accent-bg);
+  border: 1px solid var(--rg-accent-border);
+  border-radius: var(--rg-r-sm);
+  text-transform: uppercase;
+}
+
+.rg-hud-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: var(--rg-sp-4);
+}
+
+.rg-hud-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  padding: 6px 12px;
+  color: var(--rg-fg-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: var(--rg-r-sm);
+  transition:
+    color var(--rg-dur-fast) var(--rg-ease),
+    background var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-hud-nav a::before {
+  content: attr(data-key);
+  font-size: var(--rg-fs-10);
+  color: var(--rg-fg-subtle);
+  letter-spacing: 0.06em;
+  font-weight: 400;
+  transition: color var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-hud-nav a:hover {
+  color: var(--rg-fg);
+  background: var(--rg-surface-hover);
+}
+
+.rg-hud-nav a:hover::before {
+  color: var(--rg-accent);
+}
+
+.rg-hud-status {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  font-size: var(--rg-fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--rg-fg-muted);
+  flex: none;
+}
+
+.rg-hud-status-mode {
+  color: var(--rg-fg-2);
+  font-weight: 500;
+}
+
+.rg-hud-status-sep {
+  color: var(--rg-fg-subtle);
+}
+
+.rg-hud-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rg-accent);
+  box-shadow: var(--rg-accent-glow);
+  animation: rg-dot-pulse 1.6s var(--rg-ease) infinite;
+}
+
+.rg-hud-status-label {
+  color: var(--rg-accent);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-shadow: var(--rg-accent-glow);
+}
+
+@keyframes rg-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+/* ── Stage (per-page content well) ─────────────────────────────── */
+
+.rg-stage {
+  /* Stagger fade-in for direct children of the stage on first
+     paint. Keeps each page navigation feeling like a "boot" without
+     being slow. */
+  animation: rg-stage-in var(--rg-dur-slow) var(--rg-ease-out) both;
+}
+
+.rg-stage > * {
+  animation: rg-stage-in 360ms var(--rg-ease-out) both;
+}
+
+.rg-stage > :nth-child(1) {
+  animation-delay: 0ms;
+}
+.rg-stage > :nth-child(2) {
+  animation-delay: 80ms;
+}
+.rg-stage > :nth-child(3) {
+  animation-delay: 160ms;
+}
+.rg-stage > :nth-child(4) {
+  animation-delay: 240ms;
+}
+.rg-stage > :nth-child(5) {
+  animation-delay: 320ms;
+}
+.rg-stage > :nth-child(n + 6) {
+  animation-delay: 400ms;
+}
+
+@keyframes rg-stage-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ── Bottom status bar (fixed HUD chrome) ──────────────────────── */
+
+.rg-statusbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--rg-sp-3);
+  padding: 0 var(--rg-sp-4);
+  height: 28px;
+  background: var(--rg-hud-bg);
+  border-top: 1px solid var(--rg-hud-border);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-10);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rg-fg-muted);
+}
+
+.rg-statusbar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--rg-accent-border) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.rg-statusbar-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rg-statusbar-cell + .rg-statusbar-cell::before {
+  content: "│";
+  margin-right: var(--rg-sp-2);
+  color: var(--rg-fg-subtle);
+}
+
+.rg-statusbar-cell-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.rg-statusbar-cell-end {
+  margin-left: auto;
+  color: var(--rg-accent);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.rg-statusbar-key {
+  color: var(--rg-fg-subtle);
+  font-weight: 400;
+}
+
+.rg-statusbar-cell code {
+  font-family: inherit;
+  color: var(--rg-fg);
+  font-weight: 500;
+}
+
+.rg-statusbar-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rg-accent);
+  box-shadow: var(--rg-accent-glow);
+  animation: rg-dot-pulse 1.6s var(--rg-ease) infinite;
+}
+
+.rg-statusbar-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 11px;
+  margin-left: 2px;
+  background: var(--rg-accent);
+  box-shadow: var(--rg-accent-glow);
+  animation: rg-blink 1.05s steps(2, jump-none) infinite;
+  vertical-align: -1px;
+}
+
+@keyframes rg-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ── Page header / hero ────────────────────────────────────────── */
+
+.rg-header {
+  position: relative;
+  padding: var(--rg-sp-6) 0 var(--rg-sp-8);
+  margin-bottom: var(--rg-sp-10);
+  border-bottom: 1px solid var(--rg-rule);
+}
+
+.rg-header::after {
+  /* Bracketed hairline glow under the header — same trick as HUD
+     bottom edge. Subtle. */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--rg-accent-border) 0%,
+    transparent 30%,
+    transparent 70%,
+    var(--rg-accent-border) 100%
+  );
+}
+
+.rg-title {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--rg-sp-3);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-48);
+  font-weight: 600;
+  margin: 0 0 var(--rg-sp-4);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--rg-fg);
+}
+
+.rg-title::before {
+  content: "▮";
+  font-size: 0.75em;
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+  animation: rg-blink 1.05s steps(2, jump-none) infinite;
+  align-self: center;
+}
+
+.rg-description {
+  color: var(--rg-fg-muted);
+  margin: 0 0 var(--rg-sp-6);
+  font-size: var(--rg-fs-16);
+  line-height: 1.55;
+  max-width: 64ch;
+}
+
+.rg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rg-sp-6) var(--rg-sp-10);
+  margin: 0;
+  padding: var(--rg-sp-4) 0 0;
+  border-top: 1px dashed var(--rg-rule);
+}
+
+.rg-meta dt {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-10);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rg-fg-subtle);
+  font-weight: 500;
+}
+
+.rg-meta dt::before {
+  content: "[ ";
+  color: var(--rg-accent);
+}
+
+.rg-meta dt::after {
+  content: " ]";
+  color: var(--rg-accent);
+}
+
+.rg-meta dd {
+  margin: var(--rg-sp-1) 0 0;
+  font-size: var(--rg-fs-14);
+  font-family: var(--rg-font-mono);
+  color: var(--rg-fg);
+  font-weight: 500;
+}
+
+.rg-meta dd code {
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+  font-size: var(--rg-fs-13);
+}
+
+/* ── Section labels ────────────────────────────────────────────── */
+
+.rg-section {
+  margin-top: var(--rg-sp-12);
+}
+
+.rg-section h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--rg-sp-3);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--rg-fg-muted);
+  font-weight: 600;
+  margin: 0 0 var(--rg-sp-5);
+}
+
+.rg-section h2::before {
+  content: "▸";
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+  font-size: 0.9em;
+}
+
+.rg-section h2::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rg-rule-strong) 0%, var(--rg-rule-faint) 100%);
+}
+
+/* ── Crumbs ────────────────────────────────────────────────────── */
+
+.rg-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rg-sp-1);
+  margin: 0 0 var(--rg-sp-8);
+  font-size: var(--rg-fs-12);
+  font-family: var(--rg-font-mono);
+  color: var(--rg-fg-muted);
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.rg-crumbs::before {
+  content: "▸";
+  color: var(--rg-accent);
+  margin-right: var(--rg-sp-2);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-crumbs a {
+  color: var(--rg-fg-muted);
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: var(--rg-r-sm);
+  transition:
+    background var(--rg-dur-fast) var(--rg-ease),
+    color var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-crumbs a:hover {
+  background: var(--rg-surface-hover);
+  color: var(--rg-fg);
+}
+
+.rg-crumbs > span:not([aria-hidden]):last-child {
+  color: var(--rg-accent);
+  font-weight: 600;
+  padding: 3px 8px;
+  background: var(--rg-accent-bg);
+  border: 1px solid var(--rg-accent-border);
+  border-radius: var(--rg-r-sm);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-crumbs span[aria-hidden="true"] {
+  color: var(--rg-fg-subtle);
+  user-select: none;
+  padding: 0 2px;
+}
+
+/* ── Generic surfaces / utilities ──────────────────────────────── */
+
+.rg-error {
+  color: var(--rg-rem);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+  background: var(--rg-rem-bg);
+  border: 1px solid var(--rg-rem-border);
+  border-radius: var(--rg-r-md);
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  font-weight: 500;
+}
+
+.rg-error::before {
+  content: "[ ERR ] ";
+  color: var(--rg-rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.rg-muted-inline {
+  color: var(--rg-fg-muted);
+}
+
+/* ── Reusable corner-bracket frame (HUD-card chrome) ──────────────
+ * Apply via `.rg-frame` OR via the per-component selector list
+ * below. Pseudo-elements draw an L at top-left and bottom-right
+ * corners using two perpendicular borders. Visible only at the
+ * card's outer edges, ~12px each.
+ */
+.rg-frame,
+.rg-blob,
+.rg-diff,
+.rg-diff-summary,
+.rg-commit-body {
+  position: relative;
+}
+
+.rg-frame::before,
+.rg-blob::before,
+.rg-diff::before,
+.rg-diff-summary::before,
+.rg-commit-body::before,
+.rg-frame::after,
+.rg-blob::after,
+.rg-diff::after,
+.rg-diff-summary::after,
+.rg-commit-body::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  transition: border-color var(--rg-dur-base) var(--rg-ease);
+}
+
+.rg-frame::before,
+.rg-blob::before,
+.rg-diff::before,
+.rg-diff-summary::before,
+.rg-commit-body::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1px solid var(--rg-card-corner);
+  border-left: 1px solid var(--rg-card-corner);
+}
+
+.rg-frame::after,
+.rg-blob::after,
+.rg-diff::after,
+.rg-diff-summary::after,
+.rg-commit-body::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1px solid var(--rg-card-corner);
+  border-right: 1px solid var(--rg-card-corner);
+}
+
+/* ── Commit list (overview, log) ───────────────────────────────── */
+
+.rg-commit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--rg-rule);
+  font-family: var(--rg-font-mono);
+}
+
+.rg-commit {
+  display: grid;
+  grid-template-columns: 7rem 1fr auto auto;
+  gap: var(--rg-sp-4);
+  align-items: center;
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  margin: 0 calc(-1 * var(--rg-sp-4));
+  border-bottom: 1px solid var(--rg-rule-faint);
+  border-radius: var(--rg-r-sm);
+  font-size: var(--rg-fs-13);
+  position: relative;
+  transition: background var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-commit::before {
+  /* Left-edge accent rule that lights up on hover — feels like the
+     row "arms" itself. */
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: transparent;
+  transition: background var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-commit:hover {
+  background: var(--rg-surface-hover);
+}
+
+.rg-commit:hover::before {
+  background: var(--rg-accent);
+  box-shadow: var(--rg-accent-glow);
+}
+
+.rg-commit code,
+.rg-sha {
+  font-family: var(--rg-font-mono);
+  color: var(--rg-accent);
+  font-size: var(--rg-fs-12);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-subject {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--rg-fg);
+  font-family: var(--rg-font-sans);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.rg-author,
+.rg-commit time {
+  color: var(--rg-fg-muted);
+  font-size: var(--rg-fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.rg-commit-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rg-commit-link:hover {
+  color: var(--rg-accent);
+}
+
+.rg-commit-link.rg-sha {
+  color: var(--rg-accent);
+}
+
+/* ── File browser (tree listing) ───────────────────────────────── */
+
+.rg-tree {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-top: 1px solid var(--rg-rule);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+}
+
+.rg-tree th {
+  text-align: left;
+  font-size: var(--rg-fs-10);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--rg-fg-subtle);
+  font-weight: 600;
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  background: transparent;
+  border-bottom: 1px solid var(--rg-rule);
+}
+
+.rg-tree-row {
+  position: relative;
+  transition: background var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-tree-row:hover td {
+  background: var(--rg-surface-hover);
+}
+
+.rg-tree-row td {
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  border-bottom: 1px solid var(--rg-rule-faint);
+  vertical-align: middle;
+  position: relative;
+}
+
+.rg-tree-row td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: transparent;
+  transition: background var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-tree-row:hover td:first-child::before {
+  background: var(--rg-accent);
+  box-shadow: var(--rg-accent-glow);
+}
+
+.rg-tree-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  color: var(--rg-fg);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.rg-tree-name:hover {
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-tree-submodule {
+  color: var(--rg-fg-muted);
+  font-style: italic;
+  cursor: default;
+}
+
+/* Tree row rendered as plain text (non-link). Used when the static
+   export hasn't generated deep `/tree/<ref>/<path>` URLs for this ref
+   — the listing remains informative but rows aren't clickable, so we
+   suppress the hover affordance and pointer cursor. Same baseline
+   color and weight as the linked `.rg-tree-name` so rows still read
+   as primary content. */
+.rg-tree-static {
+  cursor: default;
+}
+.rg-tree-static:hover {
+  color: var(--rg-fg);
+  text-shadow: none;
+}
+.rg-tree-static:hover .rg-glyph {
+  filter: none;
+  transform: none;
+}
+
+/* Page-level callout for "this ref isn't deeply browsable in static
+   export" and similar build-scope explanations. Styled like the
+   blob-empty placeholder but slightly more prominent (it's a real
+   notice, not a benign empty-state). Sits between the crumbs and the
+   tree on `/tree/<ref>` for non-browse refs. */
+.rg-static-notice {
+  margin: var(--rg-sp-3) 0 var(--rg-sp-4);
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  border-left: 2px solid var(--rg-accent);
+  background: var(--rg-surface);
+  color: var(--rg-fg-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.rg-static-notice code {
+  background: var(--rg-surface-strong, rgba(0, 0, 0, 0.18));
+  padding: 0 0.35em;
+  border-radius: 2px;
+  font-family: var(--rg-font-mono);
+  color: var(--rg-fg);
+}
+
+.rg-glyph {
+  /* Default size for inline icons. Tree rows override to 20px below
+     for extra prominence in the primary file browser. */
+  width: 18px;
+  height: 18px;
+  flex: none;
+  transition:
+    filter var(--rg-dur-fast) var(--rg-ease),
+    transform var(--rg-dur-fast) var(--rg-ease);
+}
+
+/* Icons are now explicitly colored (filled SVG paths) — `color` no
+   longer tints them. Hover effect is a subtle brightness +
+   saturation pop with an outer halo, which adapts to whatever
+   color the icon already is. Keeps the sci-fi "lit up on hover"
+   feel without flattening the type-color palette. */
+.rg-tree-name:hover .rg-glyph,
+.rg-diff-summary li a:hover .rg-glyph,
+.rg-commit a:hover .rg-glyph {
+  filter: brightness(1.12) saturate(1.15) drop-shadow(0 0 6px var(--rg-accent-bg-strong));
+  transform: scale(1.06);
+}
+
+/* Tree-row icons render at a larger size so file types are
+   immediately readable from a normal browse-distance. */
+.rg-tree-name .rg-glyph {
+  width: 20px;
+  height: 20px;
+}
+
+.rg-tree-size {
+  color: var(--rg-fg-muted);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  white-space: nowrap;
+  width: 8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Blob view ─────────────────────────────────────────────────── */
+
+.rg-blob {
+  border: 1px solid var(--rg-rule);
+  border-radius: var(--rg-r-md);
+  overflow: hidden;
+  background: var(--rg-surface);
+  box-shadow: var(--rg-card-inset);
+  transition: border-color var(--rg-dur-base) var(--rg-ease);
+}
+
+.rg-blob:hover {
+  border-color: var(--rg-rule-strong);
+}
+
+.rg-blob-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rg-sp-4);
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  background: var(--rg-surface);
+  border-bottom: 1px solid var(--rg-rule);
+  position: relative;
+}
+
+.rg-blob-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--rg-accent-border) 50%, transparent 100%);
+}
+
+.rg-blob-path {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+  font-weight: 500;
+  word-break: break-all;
+  color: var(--rg-fg);
+  letter-spacing: -0.005em;
+}
+
+.rg-blob-path::before {
+  content: "› ";
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-blob-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  color: var(--rg-fg-muted);
+  font-size: var(--rg-fs-11);
+  font-family: var(--rg-font-mono);
+  flex: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rg-blob-meta > * + * {
+  padding-left: var(--rg-sp-2);
+  border-left: 1px solid var(--rg-rule);
+}
+
+.rg-blob-meta code {
+  font-family: var(--rg-font-mono);
+  background: var(--rg-accent-bg);
+  border: 1px solid var(--rg-accent-border);
+  border-radius: var(--rg-r-sm);
+  padding: 1px 6px;
+  color: var(--rg-accent);
+  font-size: var(--rg-fs-10);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-blob-content {
+  margin: 0;
+  /* Visual padding lives on this OUTER container, framing the
+     scrollable code region. Scrolling happens inside the inner pre
+     (Shiki path) which sits within this padding — content stays
+     bounded by pre's edges, never bleeds into the padded area. */
+  padding: var(--rg-sp-4) var(--rg-sp-5);
+  background: var(--rg-code-bg);
+  /* No overflow on this container — the inner <pre> is the only
+     scroll container. */
+}
+
+/* Plain-fallback path: <pre class="rg-blob-fallback"> is the scroll
+   container, sitting inside the padded .rg-blob-content frame —
+   structure mirrors the Shiki path so CSS stays simple. */
+.rg-blob-fallback {
+  margin: 0;
+  padding: 0;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+  line-height: 1.65;
+  color: var(--rg-fg);
+}
+
+.rg-blob-fallback > code {
+  /* Plain block sizing, matches the Shiki path. `pre-wrap` +
+     `overflow-wrap: anywhere` keeps formatting (tabs, indents) but
+     wraps long lines instead of overflowing the container. */
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rg-blob-empty {
+  margin: 0;
+  padding: var(--rg-sp-10) var(--rg-sp-5);
+  color: var(--rg-fg-muted);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+  background: var(--rg-surface-2);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.rg-blob-empty::before {
+  content: "[ NO_DATA ] — ";
+  color: var(--rg-accent);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.rg-blob-empty code {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+  background: var(--rg-bg-elevated);
+  padding: 2px 6px;
+  border-radius: var(--rg-r-sm);
+  border: 1px solid var(--rg-rule);
+  color: var(--rg-fg);
+}
+
+/* ── Commit detail ─────────────────────────────────────────────── */
+
+.rg-commit-detail {
+  margin-bottom: var(--rg-sp-10);
+}
+
+.rg-commit-subject {
+  margin: 0 0 var(--rg-sp-4);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-30);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--rg-fg);
+}
+
+.rg-commit-body {
+  /* Container chrome only; inner elements get their own typographic
+     rules under `.rg-prose` below. The `<pre>` whitespace behavior
+     used by an earlier "raw body" rendering is intentionally GONE —
+     the body is now a `<div>` populated by `bodyHtml` (markdown
+     rendered server-side via markdown-it). */
+  font-family: var(--rg-font-sans);
+  font-size: var(--rg-fs-14);
+  background: var(--rg-surface);
+  border: 1px solid var(--rg-rule);
+  border-radius: var(--rg-r-md);
+  padding: var(--rg-sp-4) var(--rg-sp-5);
+  color: var(--rg-fg-2);
+  margin: 0 0 var(--rg-sp-6);
+  line-height: 1.6;
+  box-shadow: var(--rg-card-inset);
+}
+
+/* ── Prose (rendered markdown — commit bodies, future docs/READMEs)
+ *
+ * Scoped to `.rg-prose` so the same styles can be reused anywhere a
+ * markdown-rendered HTML blob is injected. Keeps the design language
+ * (mono chrome, accent-colored code chips, sci-fi hairlines)
+ * consistent with the rest of the app — no "default browser stylesheet
+ * leaking through" feel.
+ * ─────────────────────────────────────────────────────────────── */
+
+.rg-prose > :first-child {
+  margin-top: 0;
+}
+.rg-prose > :last-child {
+  margin-bottom: 0;
+}
+
+.rg-prose p {
+  margin: 0 0 var(--rg-sp-3);
+  line-height: 1.6;
+}
+
+.rg-prose strong {
+  font-weight: 600;
+  color: var(--rg-fg);
+}
+.rg-prose em {
+  font-style: italic;
+}
+
+.rg-prose a {
+  color: var(--rg-accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rg-accent-border);
+  transition: border-color var(--rg-dur-fast) var(--rg-ease);
+}
+.rg-prose a:hover {
+  color: var(--rg-accent-hover);
+  border-bottom-color: var(--rg-accent);
+}
+
+/* Inline code — chip styling matching the meta code chips elsewhere. */
+.rg-prose code {
+  font-family: var(--rg-font-mono);
+  font-size: 0.9em;
+  background: var(--rg-accent-bg);
+  border: 1px solid var(--rg-accent-border);
+  border-radius: var(--rg-r-sm);
+  padding: 1px 6px;
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+  letter-spacing: -0.005em;
+}
+
+/* Block code — strip chip styles, use a panel surface. */
+.rg-prose pre {
+  margin: var(--rg-sp-4) 0;
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  background: var(--rg-bg-elevated);
+  border: 1px solid var(--rg-rule);
+  border-left: 2px solid var(--rg-accent-border);
+  border-radius: var(--rg-r-sm);
+  overflow-x: auto;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+  line-height: 1.6;
+  color: var(--rg-fg);
+}
+.rg-prose pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  text-shadow: none;
+  font-size: inherit;
+  letter-spacing: 0;
+}
+
+.rg-prose ul,
+.rg-prose ol {
+  margin: 0 0 var(--rg-sp-3);
+  padding-left: var(--rg-sp-5);
+}
+.rg-prose li {
+  margin: var(--rg-sp-1) 0;
+}
+.rg-prose ul {
+  list-style: none;
+}
+.rg-prose ul > li {
+  position: relative;
+}
+.rg-prose ul > li::before {
+  content: "▸";
+  position: absolute;
+  left: calc(-1 * var(--rg-sp-4));
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+  font-size: 0.85em;
+}
+.rg-prose ol {
+  list-style: decimal;
+}
+.rg-prose ol > li::marker {
+  color: var(--rg-fg-muted);
+}
+
+.rg-prose blockquote {
+  margin: var(--rg-sp-4) 0;
+  padding: var(--rg-sp-2) var(--rg-sp-4);
+  border-left: 2px solid var(--rg-accent);
+  background: var(--rg-accent-bg);
+  color: var(--rg-fg-muted);
+  font-style: italic;
+}
+.rg-prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.rg-prose hr {
+  margin: var(--rg-sp-5) 0;
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--rg-rule-strong) 50%, transparent 100%);
+}
+
+/* Headings inside commit bodies — bring them down so they don't
+   clobber the page-level subject above. */
+.rg-prose h1,
+.rg-prose h2,
+.rg-prose h3,
+.rg-prose h4,
+.rg-prose h5,
+.rg-prose h6 {
+  font-family: var(--rg-font-mono);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin: var(--rg-sp-5) 0 var(--rg-sp-2);
+  line-height: 1.3;
+  color: var(--rg-fg);
+}
+.rg-prose h1 {
+  font-size: var(--rg-fs-18);
+}
+.rg-prose h2 {
+  font-size: var(--rg-fs-16);
+}
+.rg-prose h3 {
+  font-size: var(--rg-fs-15);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--rg-fg-muted);
+}
+.rg-prose h4,
+.rg-prose h5,
+.rg-prose h6 {
+  font-size: var(--rg-fs-13);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--rg-fg-muted);
+}
+
+.rg-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--rg-sp-4) 0;
+  font-size: var(--rg-fs-13);
+}
+.rg-prose th,
+.rg-prose td {
+  text-align: left;
+  padding: var(--rg-sp-2) var(--rg-sp-3);
+  border-bottom: 1px solid var(--rg-rule-faint);
+}
+.rg-prose th {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--rg-fg-subtle);
+  font-weight: 600;
+  border-bottom: 1px solid var(--rg-rule);
+}
+
+.rg-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--rg-r-sm);
+  border: 1px solid var(--rg-rule);
+}
+
+.rg-commit-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--rg-sp-2) var(--rg-sp-6);
+  margin: 0;
+  padding: 0;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+}
+
+.rg-commit-meta div {
+  display: contents;
+}
+
+.rg-commit-meta dt {
+  font-size: var(--rg-fs-10);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rg-fg-subtle);
+  font-weight: 600;
+  align-self: baseline;
+  margin: 0;
+}
+
+.rg-commit-meta dt::before {
+  content: "› ";
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-commit-meta dd {
+  margin: 0;
+  word-break: break-all;
+  color: var(--rg-fg);
+}
+
+/* ── Diff summary ──────────────────────────────────────────────── */
+
+.rg-diff-summary {
+  margin: var(--rg-sp-10) 0 var(--rg-sp-6);
+  border: 1px solid var(--rg-rule);
+  border-radius: var(--rg-r-md);
+  overflow: hidden;
+  background: var(--rg-surface);
+  box-shadow: var(--rg-card-inset);
+}
+
+.rg-diff-summary > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  background: var(--rg-surface);
+  border-bottom: 1px solid var(--rg-rule);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+}
+
+.rg-diff-summary-count {
+  color: var(--rg-fg-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rg-diff-summary-stats {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+}
+
+.rg-diff-summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rg-diff-summary li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--rg-sp-2) var(--rg-sp-4);
+  border-bottom: 1px solid var(--rg-rule-faint);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+  position: relative;
+  transition: background var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-diff-summary li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: transparent;
+  transition: background var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-diff-summary li:hover {
+  background: var(--rg-surface-hover);
+}
+
+.rg-diff-summary li:hover::before {
+  background: var(--rg-accent);
+  box-shadow: var(--rg-accent-glow);
+}
+
+.rg-diff-summary li:last-child {
+  border-bottom: none;
+}
+
+.rg-diff-summary li a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  color: var(--rg-fg);
+  text-decoration: none;
+  font-weight: 500;
+  min-width: 0;
+}
+
+.rg-diff-summary li a .rg-glyph {
+  /* The badge sits flush left; icon goes between badge and path so
+     visual order reads as: [status] [type] path → +N -N. */
+  color: var(--rg-fg-muted);
+}
+
+.rg-diff-summary li a:hover {
+  color: var(--rg-accent);
+}
+
+.rg-diff-summary li code {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  font-weight: 500;
+}
+
+.rg-add {
+  color: var(--rg-add);
+}
+.rg-rem {
+  color: var(--rg-rem);
+}
+
+/* File-status badges */
+.rg-file-badge {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--rg-font-mono);
+  font-size: 10px;
+  border-radius: var(--rg-r-sm);
+  font-weight: 700;
+  flex: none;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.rg-file-badge-added {
+  background: var(--rg-add-bg);
+  color: var(--rg-add);
+  border: 1px solid var(--rg-add-border);
+}
+.rg-file-badge-deleted {
+  background: var(--rg-rem-bg);
+  color: var(--rg-rem);
+  border: 1px solid var(--rg-rem-border);
+}
+.rg-file-badge-modified {
+  background: var(--rg-modified-bg);
+  color: var(--rg-modified-fg);
+}
+.rg-file-badge-renamed,
+.rg-file-badge-copied {
+  background: var(--rg-renamed-bg);
+  color: var(--rg-renamed-fg);
+}
+
+/* ── Diff per-file ─────────────────────────────────────────────── */
+
+.rg-diff-files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-sp-6);
+}
+
+.rg-diff {
+  border: 1px solid var(--rg-rule);
+  border-radius: var(--rg-r-md);
+  overflow: hidden;
+  background: var(--rg-surface);
+  box-shadow: var(--rg-card-inset);
+  transition: border-color var(--rg-dur-base) var(--rg-ease);
+}
+
+.rg-diff:hover {
+  border-color: var(--rg-rule-strong);
+}
+
+.rg-diff-header {
+  display: flex;
+  align-items: center;
+  gap: var(--rg-sp-3);
+  padding: var(--rg-sp-3) var(--rg-sp-4);
+  background: var(--rg-surface);
+  border-bottom: 1px solid var(--rg-rule);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+}
+
+.rg-diff-path {
+  flex: 1;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+  font-weight: 500;
+  word-break: break-all;
+  color: var(--rg-fg);
+  letter-spacing: -0.005em;
+}
+
+/* Path-as-link: inherits color from the <code> wrapper so it doesn't
+   turn accent-blue on every diff card. Hover surfaces a subtle dashed
+   underline + accent color shift to communicate "this opens the file
+   at HEAD". */
+.rg-diff-path-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed transparent;
+  transition:
+    color var(--rg-dur-fast) var(--rg-ease),
+    border-bottom-color var(--rg-dur-fast) var(--rg-ease);
+}
+.rg-diff-path-link:hover {
+  color: var(--rg-accent);
+  border-bottom-color: var(--rg-accent-border);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-diff-path::before {
+  content: "› ";
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-arrow {
+  color: var(--rg-fg-subtle);
+  margin: 0 var(--rg-sp-1);
+}
+
+.rg-diff-stats {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  font-weight: 600;
+  flex: none;
+  letter-spacing: 0.04em;
+}
+
+/* ── Hunks ─────────────────────────────────────────────────────── */
+
+.rg-hunks {
+  display: flex;
+  flex-direction: column;
+  background: var(--rg-bg-elevated);
+}
+
+.rg-hunk-header {
+  background: var(--rg-surface-2);
+  border-top: 1px solid var(--rg-rule);
+  border-bottom: 1px solid var(--rg-rule);
+  padding: var(--rg-sp-2) var(--rg-sp-4);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  color: var(--rg-fg-muted);
+  display: flex;
+  align-items: baseline;
+  gap: var(--rg-sp-4);
+  letter-spacing: 0.04em;
+}
+
+.rg-hunks .rg-hunk:first-child .rg-hunk-header {
+  border-top: none;
+}
+
+.rg-hunk-range {
+  color: var(--rg-accent);
+  flex: none;
+  font-weight: 500;
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-hunk-context {
+  color: var(--rg-fg-subtle);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rg-hunk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-12);
+  line-height: 1.65;
+}
+
+.rg-line td {
+  padding: 0;
+  vertical-align: top;
+}
+
+.rg-ln {
+  width: 3.25rem;
+  min-width: 3.25rem;
+  padding: 0 var(--rg-sp-2);
+  text-align: right;
+  color: var(--rg-fg-subtle);
+  user-select: none;
+  background: transparent;
+  border-right: 1px solid var(--rg-rule-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.rg-line-marker {
+  width: 1.25rem;
+  text-align: center;
+  color: var(--rg-fg-subtle);
+  user-select: none;
+  font-weight: 600;
+}
+
+.rg-line-text {
+  padding: 0 var(--rg-sp-3);
+  white-space: pre;
+  width: 100%;
+  color: var(--rg-fg-2);
+}
+
+.rg-line-text code {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.rg-line-add .rg-ln {
+  background: var(--rg-add-bg);
+  color: var(--rg-add);
+  border-right-color: var(--rg-add-border);
+}
+
+.rg-line-add .rg-line-marker {
+  color: var(--rg-add-marker);
+  background: var(--rg-add-bg);
+}
+
+.rg-line-add .rg-line-text {
+  background: var(--rg-add-bg);
+  color: var(--rg-fg);
+}
+
+.rg-line-remove .rg-ln {
+  background: var(--rg-rem-bg);
+  color: var(--rg-rem);
+  border-right-color: var(--rg-rem-border);
+}
+
+.rg-line-remove .rg-line-marker {
+  color: var(--rg-rem-marker);
+  background: var(--rg-rem-bg);
+}
+
+.rg-line-remove .rg-line-text {
+  background: var(--rg-rem-bg);
+  color: var(--rg-fg);
+}
+
+/* ── Shiki dual-theme support ───────────────────────────────────────
+ * Shiki emits HTML with inline `color: …` (light theme) plus a CSS
+ * variable `--shiki-dark: …` carrying the dark theme color. We
+ * override the inline color with the variable when the user prefers
+ * dark mode. Same recipe applies to background, font-style, and
+ * font-weight when a token sets them. The background override is
+ * gated to the blob host to avoid clobbering the diff-add /
+ * diff-remove row tints.
+ *
+ * IMPORTANT: the `.rg-blob-content` / `.rg-shiki-host` / `pre.shiki`
+ * / `.line` rule set has been load-bearing through several rounds
+ * of debugging (padding-on-frame vs scroll-container, empty-line
+ * 0-height collapse, line-number gutter via counter). Don't touch
+ * the structural rules without re-walking the cases — single-line
+ * files, empty files, very wide files, files ending with a newline,
+ * files chunked across N Suspense boundaries.
+ * ──────────────────────────────────────────────────────────────── */
+
+.rg-shiki-host {
+  /* Match the Shiki theme's background color so the container's
+     padding area is continuous with the inner <pre>. The token
+     --rg-code-bg tracks GitHub light / GitHub dark via the theme
+     swap — same values Shiki's themes paint via inline `style` on
+     pre. If themes ever change, update --rg-code-bg too. */
+  background: var(--rg-code-bg);
+}
+
+.rg-shiki-host pre.shiki {
+  margin: 0;
+  /* No padding here — visual padding lives on the OUTER
+     `.rg-blob-content` container. */
+  padding: 0;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+  line-height: 1.65;
+  /* No overflow — pre is NOT a scroll container. Content sizes
+     naturally; if a line is too wide, the article (.rg-blob) is
+     where any clipping/scrolling decision is made. The pre itself
+     just lays content out at its natural width. */
+  /* Counter for inline line numbers — see `.line::before` below. */
+  counter-reset: rg-blob-line;
+  /* Override <pre>'s default `white-space: pre`. Shiki emits
+     <span class="line">...</span>\n<span class="line">...</span>
+     with literal newlines between block-level line spans. With pre,
+     those newlines render as visible blank lines between every code
+     line. Switching this container to `normal` collapses the
+     inter-element whitespace; `.line` below keeps `white-space: pre`
+     so each line preserves its OWN internal indentation/spacing. */
+  white-space: normal;
+}
+
+.rg-shiki-host pre.shiki code {
+  /* Plain block sizing — code fills the pre, lines lay out
+     naturally. No width: max-content, no min-width tricks, no
+     scroll: the user wants the box to auto-expand to its content
+     rather than scroll within a fixed width. */
+  display: block;
+}
+
+/* Multi-chunk Shiki blocks. BlobView splits files >200 lines into N
+   Suspense-wrapped chunks, each rendered as `<pre class="shiki">`
+   inside a `<div>` wrapper child of `.rg-shiki-host`. The default
+   template already paints the bg/padding on the outer `.rg-blob-content`
+   and leaves `pre.shiki` with no border/margin/radius/shadow, so
+   multiple chunks naturally stack seamlessly inside the bg-painted
+   container. The rules below are defensive: any future theme tweak
+   that re-introduces per-pre framing (border, radius, top/bottom
+   margin, box-shadow) would otherwise expose seams between chunks.
+   Chunks 1..N-1 lose top edges; chunks 0..N-2 lose bottom edges and
+   shadow so only the final chunk's shadow paints below the stack. */
+.rg-shiki-host > div:not(:first-child) > pre.shiki {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.rg-shiki-host > div:not(:last-child) > pre.shiki {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  box-shadow: none;
+}
+
+.rg-shiki-host .line {
+  counter-increment: rg-blob-line;
+  display: block;
+  /* Reserve a fixed-width gutter for the line number; tokens align
+     against the same baseline column regardless of digit count. */
+  padding-left: 4.5rem;
+  position: relative;
+  /* `pre-wrap` preserves the line's own indentation/tabs (so code
+     formatting stays intact) but allows long lines to wrap when
+     they would overflow the container. With no horizontal scroll
+     anywhere up the chain, this is the only way long lines can
+     reach the user instead of being clipped at the article's edge.
+     Combined with `overflow-wrap: anywhere`, even unbreakable
+     tokens (long URLs, strings without spaces, minified code) wrap
+     instead of forcing horizontal overflow.
+     `.line::before` is absolute-positioned at top-left of the line,
+     so the line number appears once on the first visual row of a
+     wrapped line; subsequent wrapped rows continue the 4.5rem
+     padding-left offset (provided by .line's box) so they align
+     under the original line content. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  /* Empty `<span class="line"></span>` (which Shiki emits for blank
+     source lines, including the trailing-newline empty line at end
+     of file) has zero inline content and thus zero block height by
+     default. Pinning min-height to one line-box keeps blank lines
+     visible AND keeps the absolute-positioned `.line::before` line
+     number anchored to a real box — without this, the last empty
+     line's number floats below the container's padded area. */
+  min-height: calc(1em * 1.65);
+}
+
+.rg-shiki-host .line::before {
+  content: counter(rg-blob-line);
+  position: absolute;
+  left: 0;
+  width: 3.5rem;
+  padding-right: var(--rg-sp-3);
+  text-align: right;
+  color: var(--rg-fg-subtle);
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rg-shiki-host pre.shiki,
+  .rg-shiki-host pre.shiki span,
+  .rg-shiki-line,
+  .rg-shiki-line span {
+    color: var(--shiki-dark) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+  /* Only swap the *blob* background — diff rows have their own +/- tint
+     from the row-level CSS that we don't want overwritten. */
+  .rg-shiki-host pre.shiki,
+  .rg-shiki-host pre.shiki span {
+    background-color: var(--shiki-dark-bg) !important;
+  }
+  /* Container's padding area follows the same swap so it stays
+     continuous with the pre. The --rg-code-bg token already tracks
+     GitHub dark in the dark-mode :root override above. */
+}
+
+/* Diff-line tokens: keep tokens transparent so the row-level
+   add/remove background tint shows through. The Shiki bg the wrapper
+   normally carries doesn't apply because `highlightDiffLine` strips
+   the wrapper. */
+.rg-shiki-line span {
+  background-color: transparent !important;
+}
+
+/* ── Refs + tags ───────────────────────────────────────────────── */
+
+.rg-ref-name {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+  color: var(--rg-accent);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-ref-head-badge {
+  display: inline-block;
+  margin-left: var(--rg-sp-2);
+  padding: 1px 8px;
+  border-radius: var(--rg-r-pill);
+  background: var(--rg-accent-bg);
+  color: var(--rg-accent);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-10);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  font-weight: 700;
+  border: 1px solid var(--rg-accent-border);
+  text-shadow: var(--rg-accent-glow);
+}
+
+/* ── Diff view toggle (inline ↔ split) ─────────────────────────── */
+
+/* Split-view layout. Four columns: ln | text | ln | text.
+ * Line-number columns are fixed-width via `.rg-ln`; the two text
+ * columns share the remaining space evenly so a long token in one
+ * side doesn't squeeze the other. */
+.rg-hunk-split-table {
+  table-layout: fixed;
+}
+
+.rg-hunk-split-table td.rg-line-text {
+  width: 50%;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Tints follow the line kind, applied to both the line-number cell
+ * and the text cell on each side so the row reads as add/remove/
+ * context at a glance. `.rg-split-empty` is the placeholder color
+ * used when one side has no counterpart in the pair. */
+.rg-hunk-split-table .rg-split-add {
+  background: var(--rg-add-bg);
+}
+
+.rg-hunk-split-table .rg-split-remove {
+  background: var(--rg-rem-bg);
+}
+
+.rg-hunk-split-table .rg-split-context {
+  background: transparent;
+}
+
+.rg-hunk-split-table .rg-split-empty {
+  background: var(--rg-surface-2);
+}
+
+/* Number cells in split view: keep the muted color from `.rg-ln` but
+ * let the row tint show through (override the default ln background). */
+.rg-hunk-split-table .rg-ln {
+  background: transparent;
+}
+
+.rg-hunk-split-table .rg-split-add.rg-ln {
+  color: var(--rg-add-marker);
+}
+
+.rg-hunk-split-table .rg-split-remove.rg-ln {
+  color: var(--rg-rem-marker);
+}
+
+/* Vertical separator between the two sides for visual grouping. */
+.rg-hunk-split-table .rg-split-cell:nth-child(3) {
+  border-left: 1px solid var(--rg-rule);
+}
+
+/* Toggle UI. Lives at the top of the diff section on commit pages.
+ * Two buttons in a connected pill; the active one carries
+ * `aria-pressed="true"` and `.is-active`. */
+.rg-diff-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--rg-sp-6) 0 var(--rg-sp-3);
+}
+
+.rg-diff-toggle {
+  display: inline-flex;
+  border: 1px solid var(--rg-rule);
+  border-radius: var(--rg-r-sm);
+  padding: 2px;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  background: var(--rg-surface);
+  box-shadow: var(--rg-card-inset);
+  gap: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.rg-diff-toggle-btn {
+  background: transparent;
+  border: 0;
+  color: var(--rg-fg-muted);
+  padding: 5px 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  border-radius: var(--rg-r-sm);
+  transition:
+    background var(--rg-dur-fast) var(--rg-ease),
+    color var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-diff-toggle-btn:hover {
+  color: var(--rg-fg);
+  background: var(--rg-surface-hover);
+}
+
+.rg-diff-toggle-btn.is-active,
+.rg-diff-toggle-btn[aria-pressed="true"] {
+  color: var(--rg-accent);
+  background: var(--rg-accent-bg);
+  text-shadow: var(--rg-accent-glow);
+}
+
+/* ── Blob view toggle (rendered ↔ raw) ──────────────────────────
+ * Lives in its own controls row between the blob header and the
+ * body — mirrors `.rg-diff-controls` / `.rg-diff-toggle` from the
+ * commit page so the two toggles share one visual motif and the
+ * blob header stays uncluttered.
+ *
+ * Visible whenever the runtime augments the blob with a renderable
+ * representation (markdown `bodyHtml`, image/audio/video
+ * `mediaUri`, SVG `mediaUri`). */
+
+.rg-blob-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: var(--rg-sp-2) var(--rg-sp-3);
+  background: var(--rg-surface);
+  border-bottom: 1px solid var(--rg-rule);
+}
+
+.rg-blob-view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--rg-rule);
+  border-radius: var(--rg-r-sm);
+  padding: 2px;
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  background: var(--rg-bg-elevated);
+  box-shadow: var(--rg-card-inset);
+  gap: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.rg-blob-view-btn {
+  background: transparent;
+  border: 0;
+  color: var(--rg-fg-muted);
+  padding: 5px 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  border-radius: var(--rg-r-sm);
+  transition:
+    background var(--rg-dur-fast) var(--rg-ease),
+    color var(--rg-dur-fast) var(--rg-ease);
+}
+
+.rg-blob-view-btn:hover {
+  color: var(--rg-fg);
+  background: var(--rg-surface-hover);
+}
+
+.rg-blob-view-btn.is-active,
+.rg-blob-view-btn[aria-pressed="true"] {
+  color: var(--rg-accent);
+  background: var(--rg-accent-bg);
+  text-shadow: var(--rg-accent-glow);
+}
+
+/* ── Rendered-blob surfaces ────────────────────────────────────── */
+
+/* Markdown — `.rg-prose` typography on the regular surface
+   color (not the syntax-theme bg, which fights prose). Padding
+   matches the standard blob content frame so the prose lines up
+   with non-markdown blob views — no extra inset, no centering
+   gutters. The card's outer `.rg-blob` border + bg already
+   provide the visual frame; this layer is just text padding. */
+.rg-blob-content-markdown {
+  background: var(--rg-surface);
+  padding: var(--rg-sp-4) var(--rg-sp-5);
+}
+
+/* Media (image / audio / video) — center the element in a neutral
+   surface with breathing room. Checkered backdrop on the image
+   container reveals transparency in PNGs/SVGs. */
+.rg-blob-content-media {
+  background:
+    /* Subtle 8px checkerboard so transparent PNGs/SVGs read
+       correctly. Two layered gradients form the squares — using
+       the existing surface tokens so the pattern adapts to light
+       and dark modes without per-mode rules. */
+    linear-gradient(45deg, var(--rg-surface-2) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--rg-surface-2) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--rg-surface-2) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--rg-surface-2) 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0px;
+  background-color: var(--rg-surface);
+  padding: var(--rg-sp-8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.rg-blob-content-media img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  background: var(--rg-bg-elevated);
+  border: 1px solid var(--rg-rule);
+  border-radius: var(--rg-r-sm);
+  box-shadow: var(--rg-shadow-md);
+}
+
+.rg-blob-content-media video {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: var(--rg-r-sm);
+  background: #000;
+  box-shadow: var(--rg-shadow-md);
+}
+
+.rg-blob-content-media audio {
+  width: min(100%, 480px);
+  background: var(--rg-surface-2);
+  border-radius: var(--rg-r-pill);
+}
+
+/* Raw view of a binary asset — there's no useful text source, so
+   we surface a metadata strip instead of the generic "binary file"
+   placeholder. Read as: name, byte count, blob SHA. */
+.rg-blob-content-rawmeta {
+  background: var(--rg-surface);
+  padding: var(--rg-sp-5) var(--rg-sp-6);
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-13);
+  color: var(--rg-fg-muted);
+}
+
+.rg-blob-rawmeta-line {
+  margin: 0 0 var(--rg-sp-4);
+  color: var(--rg-fg);
+}
+
+.rg-blob-rawmeta-label {
+  color: var(--rg-accent);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-blob-rawmeta-label::before {
+  content: "[ ";
+  color: var(--rg-accent);
+}
+.rg-blob-rawmeta-label::after {
+  content: " ]";
+  color: var(--rg-accent);
+}
+
+.rg-blob-rawmeta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--rg-sp-2) var(--rg-sp-5);
+  margin: 0;
+}
+
+.rg-blob-rawmeta dt {
+  font-size: var(--rg-fs-10);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--rg-fg-subtle);
+  font-weight: 600;
+  align-self: baseline;
+  margin: 0;
+}
+
+.rg-blob-rawmeta dt::before {
+  content: "› ";
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+}
+
+.rg-blob-rawmeta dd {
+  margin: 0;
+  word-break: break-all;
+  color: var(--rg-fg);
+}
+
+.rg-blob-rawmeta dd code {
+  font-family: inherit;
+}
+
+/* ── Inline-icon affordances ─────────────────────────────────────
+ * Anywhere a `<FileIcon>` was inserted alongside text — HUD nav,
+ * blob/diff headers, crumb leaves, commit-list cells, etc. — these
+ * rules keep the icon vertically centered with the text and tune
+ * the icon's color/size for the surrounding chrome scale.
+ * ─────────────────────────────────────────────────────────────── */
+
+/* HUD nav: icons sit between the [data-key] prefix and the label.
+   Bumped to 16px so the colored chips read at-a-glance. */
+.rg-hud-nav a .rg-glyph {
+  width: 16px;
+  height: 16px;
+}
+
+/* Blob header: icon flush with the file path. Larger here so the
+   file-type identification is unambiguous. */
+.rg-blob-path {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  min-width: 0;
+}
+.rg-blob-path .rg-glyph {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.rg-blob-path-text {
+  word-break: break-all;
+}
+/* The `>` accent prefix moves to the text-only inner span so the
+   icon sits BEFORE the prefix, and the prefix decorates the path
+   like before. */
+.rg-blob-path::before {
+  content: none;
+}
+.rg-blob-path-text::before {
+  content: "› ";
+  color: var(--rg-accent);
+  text-shadow: var(--rg-accent-glow);
+}
+
+/* Diff per-file header: icon between mode-badge and code path. */
+.rg-diff-header > .rg-glyph {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* Crumb leaf chip — wraps icon + text in the existing chip style. */
+.rg-crumbs > .rg-crumbs-leaf:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  color: var(--rg-accent);
+  font-weight: 600;
+  padding: 3px 8px 3px 5px;
+  background: var(--rg-accent-bg);
+  border: 1px solid var(--rg-accent-border);
+  border-radius: var(--rg-r-sm);
+  text-shadow: var(--rg-accent-glow);
+}
+.rg-crumbs-leaf .rg-glyph {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* Commit-list cells: each grid item carries its own icon now.
+   Make the cells inline-flex so icons align with text. */
+.rg-commit > a,
+.rg-commit > .rg-author,
+.rg-commit > time {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-sp-2);
+  min-width: 0;
+}
+.rg-commit > a > span,
+.rg-commit > .rg-author > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rg-commit .rg-glyph {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* Diff-summary file rows: icon between status badge and path. */
+.rg-diff-summary li .rg-glyph {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* Refs/tags name cells: bump up to match tree-row icon size since
+   they live in the same `.rg-tree-name` flex row. */
+.rg-tree-name .rg-glyph + .rg-ref-name {
+  margin-left: 0;
+}
+
+/* ── Reduced motion ────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .rg-ambient-grid,
+  .rg-ambient-scan,
+  .rg-ambient-glow,
+  .rg-hud-brand-mark,
+  .rg-hud-status-dot,
+  .rg-statusbar-pulse,
+  .rg-statusbar-cursor,
+  .rg-title::before,
+  .rg-stage,
+  .rg-stage > * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .rg-statusbar-cursor,
+  .rg-title::before {
+    opacity: 1 !important;
+  }
+}
+
+/* ── Commit calendar ────────────────────────────────────────────── */
+
+.rg-cal {
+  margin-top: var(--rg-sp-12);
+}
+
+.rg-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--rg-sp-3);
+  margin-bottom: var(--rg-sp-4);
+}
+
+.rg-cal-heading {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--rg-fg-muted);
+  font-weight: 600;
+  margin: 0;
+}
+
+.rg-cal-legend {
+  font-family: var(--rg-font-mono);
+  font-size: var(--rg-fs-10);
+  color: var(--rg-fg-muted);
+  letter-spacing: 0.06em;
+}
+
+.rg-cal-legend-cell {
+  border: 1px solid var(--rg-rule);
+}
+
+.rg-cal-day-label,
+.rg-cal-month-label {
+  font-family: var(--rg-font-mono);
+  font-size: 9px;
+  fill: var(--rg-fg-muted);
+}
+
+.rg-cal-cell {
+  stroke: var(--rg-rule);
+  stroke-width: 0.5;
+}
+
+/* Light-mode tiers — accent (orange) ramp keeps the calendar tied
+ * to the rest of the theme's identity rather than introducing a
+ * separate colorway. Tier 0 is the surface, not transparent, so the
+ * grid reads as a coherent rectangle even on busy backgrounds. */
+.rg-cal-l0 {
+  fill: var(--rg-surface-2);
+}
+.rg-cal-l1 {
+  fill: rgba(199, 90, 26, 0.25);
+}
+.rg-cal-l2 {
+  fill: rgba(199, 90, 26, 0.5);
+}
+.rg-cal-l3 {
+  fill: rgba(199, 90, 26, 0.75);
+}
+.rg-cal-l4 {
+  fill: var(--rg-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  .rg-cal-l0 {
+    fill: var(--rg-surface-2);
+  }
+  .rg-cal-l1 {
+    fill: rgba(0, 255, 213, 0.18);
+  }
+  .rg-cal-l2 {
+    fill: rgba(0, 255, 213, 0.4);
+  }
+  .rg-cal-l3 {
+    fill: rgba(0, 255, 213, 0.7);
+  }
+  .rg-cal-l4 {
+    fill: var(--rg-accent);
+  }
+}

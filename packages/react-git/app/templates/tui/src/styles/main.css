@@ -1,0 +1,1218 @@
+/* tui — terminal-UI theme.
+ *
+ * Aesthetic: tig / lazygit / k9s in the browser. Strict monospace,
+ * ANSI 16-color palette pinned to terminal-emulator-typical hex
+ * values, hard-edge borders, no decoration that doesn't exist in a
+ * real terminal.
+ *
+ * Design rules (the ones that matter for keeping the look honest):
+ *
+ *   - No `border-radius` anywhere. Every box is square.
+ *   - No `box-shadow`, no gradients, no `filter` effects, no
+ *     `backdrop-filter`. Terminals don't blur.
+ *   - No `transition` / `animation` except for the cursor blink.
+ *     Hover state is instant (it would be in a TUI).
+ *   - All type is monospace, line-height `1.4`, weight 400 with
+ *     occasional 700 for emphasis. No italics for chrome (terminal
+ *     italics are hit-and-miss).
+ *   - Colors come from the ANSI 16 palette. No "CSS color" out-of-
+ *     palette fills.
+ *   - Spacing is in `rem`, tight (0.25–0.75rem).
+ *
+ * The DOM the layout emits (ambient grid divs, HUD chrome,
+ * statusbar) stays — we restyle it. `.rg-ambient*` divs are
+ * invisible decoration in the default theme; we hide them outright.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ANSI 16-color palette. Values from the GNOME Tango set, which is
+   * a good balance of "looks like a terminal" without being so
+   * saturated it's painful to read. iTerm2 / Apple Terminal users
+   * will recognize these as close to the default Pro palette. */
+  --ansi-black: #2e3436;
+  --ansi-red: #cc0000;
+  --ansi-green: #4e9a06;
+  --ansi-yellow: #c4a000;
+  --ansi-blue: #3465a4;
+  --ansi-magenta: #75507b;
+  --ansi-cyan: #06989a;
+  --ansi-white: #d3d7cf;
+  --ansi-bright-black: #555753;
+  --ansi-bright-red: #ef2929;
+  --ansi-bright-green: #8ae234;
+  --ansi-bright-yellow: #fce94f;
+  --ansi-bright-blue: #729fcf;
+  --ansi-bright-magenta: #ad7fa8;
+  --ansi-bright-cyan: #34e2e2;
+  --ansi-bright-white: #eeeeec;
+
+  /* Semantic aliases — use these for theming, not the raw ANSI
+   * names. Anchors what the role of each color is. */
+  --term-bg: #1c1c1c; /* slightly darker than ansi-black for contrast */
+  --term-bg-cell: var(--ansi-bright-black);
+  --term-fg: var(--ansi-bright-white);
+  --term-fg-dim: var(--ansi-white);
+  --term-fg-muted: var(--ansi-bright-black);
+  --term-rule: var(--ansi-bright-black);
+  --term-link: var(--ansi-bright-cyan);
+  --term-accent: var(--ansi-bright-yellow);
+  --term-add: var(--ansi-bright-green);
+  --term-rem: var(--ansi-bright-red);
+  --term-add-bg: rgba(78, 154, 6, 0.18);
+  --term-rem-bg: rgba(204, 0, 0, 0.18);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--term-bg);
+  color: var(--term-fg);
+  font-family:
+    ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+}
+
+body {
+  margin: 0;
+  /* Reserve space for the fixed bottom statusbar. */
+  padding: 0 0 1.7rem;
+}
+
+/* No ambient decoration in a TUI. */
+.rg-ambient,
+.rg-ambient-grid,
+.rg-ambient-scan,
+.rg-ambient-glow {
+  display: none;
+}
+
+a {
+  color: var(--term-link);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+pre {
+  margin: 0.25rem 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--term-bg);
+  color: var(--term-fg);
+  border: 1px solid var(--term-rule);
+  overflow-x: auto;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button {
+  font: inherit;
+  background: var(--term-bg);
+  color: var(--term-fg);
+  border: 1px solid var(--term-rule);
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+button:hover {
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.125rem 0.5rem;
+}
+
+/* ── App shell ───────────────────────────────────────────────── */
+
+.rg-app {
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* HUD = top title bar. tmux-style: `[name] sha  files | log | refs ...  STATUS` */
+.rg-hud {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--term-rule);
+  background: var(--term-bg);
+}
+
+.rg-hud-brand {
+  color: var(--term-fg);
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.rg-hud-brand:hover {
+  text-decoration: none;
+}
+
+.rg-hud-brand-mark {
+  display: none;
+}
+
+.rg-hud-brand-name::before {
+  content: "[";
+  color: var(--term-fg-muted);
+}
+.rg-hud-brand-name::after {
+  content: "]";
+  color: var(--term-fg-muted);
+}
+
+.rg-hud-brand-sha {
+  color: var(--term-link);
+  text-decoration: none;
+  font-size: 0.9em;
+}
+.rg-hud-brand-sha:hover {
+  text-decoration: underline;
+}
+
+.rg-hud-nav {
+  display: inline-flex;
+  gap: 0;
+  font-weight: 700;
+}
+
+.rg-hud-nav a {
+  color: var(--term-fg);
+  text-decoration: none;
+  padding: 0 0.5rem;
+  border-right: 1px solid var(--term-rule);
+}
+.rg-hud-nav a:first-child {
+  border-left: 1px solid var(--term-rule);
+}
+
+.rg-hud-nav a:hover {
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+  text-decoration: none;
+}
+
+.rg-hud-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9em;
+  color: var(--term-fg-muted);
+}
+
+.rg-hud-status-mode {
+  color: var(--term-accent);
+  font-weight: 700;
+}
+
+.rg-hud-status-sep {
+  color: var(--term-fg-muted);
+}
+
+.rg-hud-status-dot {
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  background: var(--term-add);
+}
+
+.rg-hud-status-label {
+  color: var(--term-add);
+  font-weight: 700;
+}
+
+/* ── Statusbar = tmux-style sticky bottom strip ──────────────── */
+
+.rg-statusbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1.7rem;
+  background: var(--ansi-blue);
+  color: var(--term-bg);
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  gap: 0.75rem;
+  font-size: 0.9em;
+  z-index: 100;
+}
+
+.rg-statusbar-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.rg-statusbar-key {
+  background: var(--term-bg);
+  color: var(--term-fg);
+  padding: 0 0.3rem;
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
+.rg-statusbar-cell-grow {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rg-statusbar-cell-end {
+  margin-left: auto;
+}
+
+.rg-statusbar-pulse {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  background: var(--term-add);
+  margin-right: 0.2em;
+}
+
+/* Cursor block — blinks slowly. The one animation we allow because
+ * the look depends on it. */
+.rg-statusbar-cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  background: var(--term-bg);
+  vertical-align: text-bottom;
+  animation: rg-tui-cursor 1.06s step-end infinite;
+}
+@keyframes rg-tui-cursor {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-statusbar-cursor {
+    animation: none;
+  }
+}
+
+/* ── Stage / pages ───────────────────────────────────────────── */
+
+.rg-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rg-overview,
+.rg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rg-header {
+  border-bottom: 1px solid var(--term-rule);
+  padding-bottom: 0.5rem;
+}
+
+.rg-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--term-accent);
+}
+.rg-title::before {
+  content: "# ";
+  color: var(--term-fg-muted);
+}
+
+.rg-description {
+  margin: 0.25rem 0 0;
+  color: var(--term-fg-dim);
+}
+
+.rg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin: 0.5rem 0 0;
+}
+.rg-meta > div {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.rg-meta dt {
+  color: var(--term-fg-muted);
+  font-weight: 400;
+}
+.rg-meta dt::after {
+  content: ":";
+}
+.rg-meta dd {
+  margin: 0;
+}
+
+.rg-section {
+  margin: 0;
+}
+
+.rg-section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--term-accent);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rg-section h2::before {
+  content: "──";
+  color: var(--term-fg-muted);
+}
+.rg-section h2::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--term-rule);
+}
+
+/* Crumbs */
+.rg-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--term-rule);
+  padding-bottom: 0.25rem;
+}
+.rg-crumbs > * {
+  color: var(--term-fg-dim);
+}
+.rg-crumbs a {
+  color: var(--term-link);
+}
+.rg-crumbs span[aria-hidden="true"] {
+  color: var(--term-fg-muted);
+}
+
+.rg-ref-name {
+  color: var(--term-accent);
+  font-weight: 700;
+}
+
+.rg-crumbs-leaf {
+  color: var(--term-fg);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Errors / notices */
+.rg-error {
+  color: var(--term-rem);
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--term-rem);
+}
+.rg-error::before {
+  content: "!! ";
+}
+
+.rg-static-notice {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--term-accent);
+  color: var(--term-fg-dim);
+}
+
+/* Muted inline / arrow / add / rem helpers */
+.rg-muted-inline {
+  color: var(--term-fg-muted);
+}
+.rg-arrow {
+  color: var(--term-fg-muted);
+}
+.rg-add {
+  color: var(--term-add);
+  font-weight: 700;
+}
+.rg-rem {
+  color: var(--term-rem);
+  font-weight: 700;
+}
+
+/* SHA chips */
+.rg-sha {
+  color: var(--term-accent);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.rg-commit-link {
+  color: inherit;
+  text-decoration: none;
+}
+.rg-commit-link:hover {
+  text-decoration: underline;
+}
+
+/* ── File browser ────────────────────────────────────────────── */
+
+.rg-tree {
+  border: 1px solid var(--term-rule);
+  font-variant-numeric: tabular-nums;
+}
+.rg-tree thead {
+  background: var(--term-bg-cell);
+}
+.rg-tree thead th {
+  color: var(--term-bg);
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+}
+
+.rg-tree-row td {
+  padding: 0.125rem 0.5rem;
+  border-bottom: 1px solid transparent;
+}
+.rg-tree-row:hover td {
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+}
+.rg-tree-row:hover a,
+.rg-tree-row:hover .rg-tree-name,
+.rg-tree-row:hover .rg-tree-size,
+.rg-tree-row:hover .rg-glyph {
+  color: var(--term-bg);
+}
+
+.rg-tree-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  color: var(--term-fg);
+  text-decoration: none;
+}
+.rg-tree-name:hover {
+  text-decoration: underline;
+}
+
+.rg-tree-up .rg-tree-name {
+  color: var(--term-fg-muted);
+}
+.rg-tree-submodule {
+  color: var(--term-fg-muted);
+}
+.rg-tree-static {
+  color: var(--term-fg-dim);
+}
+
+.rg-tree-size {
+  color: var(--term-fg-muted);
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* ── Glyph (FileIcon override emits text spans) ──────────────── */
+
+.rg-glyph {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  color: var(--term-fg-muted);
+  font-family: inherit;
+  font-weight: 400;
+}
+
+/* ── Blob view ───────────────────────────────────────────────── */
+
+.rg-blob {
+  border: 1px solid var(--term-rule);
+}
+
+.rg-blob-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+  border-bottom: 1px solid var(--term-rule);
+}
+.rg-blob-header * {
+  color: inherit;
+}
+.rg-blob-header .rg-glyph {
+  color: inherit;
+}
+
+.rg-blob-path {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.rg-blob-meta {
+  display: inline-flex;
+  gap: 0.75rem;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.rg-blob-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--term-rule);
+}
+
+.rg-blob-content {
+  padding: 0.5rem;
+}
+.rg-blob-content-markdown {
+  padding: 0.75rem 1rem;
+}
+.rg-blob-content-media {
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+.rg-blob-content-media img,
+.rg-blob-content-media video,
+.rg-blob-content-media audio {
+  max-width: 100%;
+}
+.rg-blob-content-rawmeta {
+  padding: 0.75rem 1rem;
+}
+
+.rg-blob-rawmeta-line {
+  margin: 0 0 0.5rem;
+}
+.rg-blob-rawmeta-label {
+  color: var(--term-accent);
+  font-weight: 700;
+}
+.rg-blob-rawmeta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+}
+.rg-blob-rawmeta dt {
+  color: var(--term-fg-muted);
+}
+.rg-blob-rawmeta dt::after {
+  content: ":";
+}
+.rg-blob-rawmeta dd {
+  margin: 0;
+}
+
+.rg-blob-empty {
+  padding: 1rem;
+  color: var(--term-fg-muted);
+  text-align: center;
+}
+
+.rg-blob-fallback {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+/* Blob view toggle / diff toggle — flat segmented control */
+.rg-blob-view-toggle,
+.rg-diff-toggle {
+  display: inline-flex;
+  border: 1px solid var(--term-rule);
+}
+
+.rg-blob-view-btn,
+.rg-diff-toggle-btn {
+  background: var(--term-bg);
+  color: var(--term-fg);
+  border: none;
+  padding: 0 0.6rem;
+  height: 1.5rem;
+  font: inherit;
+  cursor: pointer;
+}
+.rg-blob-view-btn + .rg-blob-view-btn,
+.rg-diff-toggle-btn + .rg-diff-toggle-btn {
+  border-left: 1px solid var(--term-rule);
+}
+.rg-blob-view-btn:hover,
+.rg-diff-toggle-btn:hover {
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+}
+.rg-blob-view-btn.is-active,
+.rg-diff-toggle-btn.is-active {
+  background: var(--term-accent);
+  color: var(--term-bg);
+  font-weight: 700;
+}
+
+/* ── Prose (rendered markdown) ───────────────────────────────── */
+
+.rg-prose h1,
+.rg-prose h2,
+.rg-prose h3,
+.rg-prose h4,
+.rg-prose h5,
+.rg-prose h6 {
+  font-weight: 700;
+  color: var(--term-accent);
+  margin: 1rem 0 0.4rem;
+}
+.rg-prose h1 {
+  font-size: 1.2rem;
+}
+.rg-prose h2 {
+  font-size: 1.1rem;
+}
+.rg-prose h3 {
+  font-size: 1rem;
+}
+.rg-prose h4,
+.rg-prose h5,
+.rg-prose h6 {
+  font-size: 0.95rem;
+}
+.rg-prose p {
+  margin: 0 0 0.6rem;
+}
+.rg-prose ul,
+.rg-prose ol {
+  margin: 0 0 0.6rem;
+  padding-left: 1.5rem;
+}
+.rg-prose li {
+  margin: 0.15rem 0;
+}
+.rg-prose code {
+  background: var(--term-bg-cell);
+  color: var(--term-fg);
+  padding: 0 0.3rem;
+}
+.rg-prose pre {
+  margin: 0.5rem 0;
+  background: var(--term-bg);
+  border: 1px solid var(--term-rule);
+}
+.rg-prose pre code {
+  background: transparent;
+  padding: 0;
+}
+.rg-prose blockquote {
+  margin: 0 0 0.6rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--term-accent);
+  color: var(--term-fg-dim);
+}
+.rg-prose hr {
+  border: 0;
+  border-top: 1px solid var(--term-rule);
+  margin: 0.75rem 0;
+}
+.rg-prose a {
+  color: var(--term-link);
+  text-decoration: underline;
+}
+.rg-prose img {
+  max-width: 100%;
+  border: 1px solid var(--term-rule);
+}
+
+/* Shiki containers — match terminal bg, square corners. The `!important`
+ * on background overrides Shiki's inline theme bg, which would
+ * otherwise inject a non-terminal hue. */
+.rg-shiki-host pre.shiki {
+  background: var(--term-bg) !important;
+  color: var(--term-fg);
+  border: 1px solid var(--term-rule);
+  padding: 0.5rem;
+}
+.rg-shiki-line {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Multi-chunk Shiki blocks — see comment in default template. TUI
+ * pre.shiki has a 1px terminal-rule border around the whole code
+ * pane; with a chunked file the inner borders would draw a stack of
+ * boxes. Drop the seam edges so consecutive chunks merge into one
+ * continuous bordered terminal pane. */
+.rg-shiki-host > div:not(:first-child) > pre.shiki {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.rg-shiki-host > div:not(:last-child) > pre.shiki {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Force Shiki's dark-theme tokens regardless of the OS color-scheme
+ * preference. TUI is always-dark by design (`:root { color-scheme:
+ * dark }`); without this rule, Shiki's dual-theme output paints
+ * with its DEFAULT (light) theme colors via inline `style="color:
+ * #24292e"` (github-light dark text). On the terminal-black bg
+ * forced above, that yields dark text on dark background — the
+ * unreadable combination. The dual-theme output also exposes
+ * `--shiki-dark` (and friends) on every span; promoting them to
+ * the active color/style restores readability.
+ *
+ * Unlike the default template (which gates this swap behind
+ * `@media (prefers-color-scheme: dark)`), TUI applies it
+ * UNCONDITIONALLY — TUI's whole identity is "terminal", and the
+ * system mode shouldn't get a vote on syntax-token colors. */
+.rg-shiki-host pre.shiki,
+.rg-shiki-host pre.shiki span,
+.rg-shiki-line,
+.rg-shiki-line span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+/* ── Diff view ───────────────────────────────────────────────── */
+
+.rg-diff-files {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rg-diff {
+  border: 1px solid var(--term-rule);
+}
+
+.rg-diff-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+  border-bottom: 1px solid var(--term-rule);
+}
+.rg-diff-header * {
+  color: inherit;
+}
+.rg-diff-header .rg-glyph {
+  color: inherit;
+}
+
+.rg-diff-path {
+  flex: 1;
+  font-weight: 700;
+}
+.rg-diff-path-link {
+  color: var(--term-bg);
+  text-decoration: underline;
+}
+
+.rg-diff-stats {
+  display: inline-flex;
+  gap: 0.5rem;
+  font-size: 0.9em;
+}
+
+/* File mode badges (A/D/M/R/C) */
+.rg-file-badge {
+  display: inline-block;
+  width: 1.6em;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85em;
+  padding: 0;
+  border: 1px solid currentColor;
+  background: var(--term-bg);
+}
+.rg-file-badge-added {
+  color: var(--term-add);
+}
+.rg-file-badge-deleted {
+  color: var(--term-rem);
+}
+.rg-file-badge-modified {
+  color: var(--term-accent);
+}
+.rg-file-badge-renamed {
+  color: var(--ansi-bright-magenta);
+}
+.rg-file-badge-copied {
+  color: var(--ansi-bright-cyan);
+}
+
+.rg-diff-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--term-rule);
+}
+
+/* Diff hunks */
+.rg-hunks {
+  padding: 0;
+}
+.rg-hunk {
+  border-top: 1px solid var(--term-rule);
+}
+.rg-hunk:first-child {
+  border-top: none;
+}
+
+.rg-hunk-header {
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.9em;
+}
+.rg-hunk-range {
+  color: var(--term-bg);
+  font-weight: 700;
+}
+.rg-hunk-context {
+  color: var(--term-bg);
+  margin-left: 0.5rem;
+  opacity: 0.85;
+}
+
+.rg-hunk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+.rg-hunk-table td {
+  padding: 0 0.4rem;
+  vertical-align: top;
+}
+
+.rg-ln {
+  color: var(--term-fg-muted);
+  text-align: right;
+  width: 4ch;
+  user-select: none;
+  white-space: nowrap;
+  background: var(--term-bg);
+}
+
+.rg-line-marker {
+  width: 1ch;
+  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.rg-line-text {
+  white-space: pre;
+  font-family: inherit;
+}
+
+.rg-line-add {
+  background: var(--term-add-bg);
+}
+.rg-line-add .rg-line-marker {
+  color: var(--term-add);
+}
+.rg-line-add .rg-ln-new {
+  color: var(--term-add);
+}
+
+.rg-line-remove {
+  background: var(--term-rem-bg);
+}
+.rg-line-remove .rg-line-marker {
+  color: var(--term-rem);
+}
+.rg-line-remove .rg-ln-old {
+  color: var(--term-rem);
+}
+
+.rg-line-context {
+  background: transparent;
+}
+
+/* Split-view diff */
+.rg-hunk-split-table {
+  table-layout: fixed;
+}
+.rg-split-cell {
+  padding: 0 0.4rem;
+  vertical-align: top;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rg-split-add {
+  background: var(--term-add-bg);
+}
+.rg-split-remove {
+  background: var(--term-rem-bg);
+}
+.rg-split-context {
+  background: transparent;
+}
+.rg-split-empty {
+  background: var(--term-bg-cell);
+  opacity: 0.25;
+}
+
+/* Diff summary — `<section><header>…</header><ul>…</ul></section>`.
+ * `.rg-diff-summary` is the section container; the inner `<ul>` and
+ * `<header>` each need their own layout. */
+.rg-diff-summary {
+  margin: 0;
+  border: 1px solid var(--term-rule);
+}
+.rg-diff-summary > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-bottom: 1px solid var(--term-rule);
+}
+.rg-diff-summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rg-diff-summary li {
+  padding: 0.125rem 0.5rem;
+  border-bottom: 1px solid var(--term-rule);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rg-diff-summary li:last-child {
+  border-bottom: none;
+}
+.rg-diff-summary a {
+  /* inline-flex so the file badge + icon + path align on one line;
+   * `min-width: 0` lets a long path shrink and not push the stats
+   * column off the right edge. */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  color: var(--term-link);
+  text-decoration: none;
+}
+.rg-diff-summary a:hover {
+  text-decoration: underline;
+}
+
+.rg-diff-summary-stats {
+  white-space: nowrap;
+  font-size: 0.9em;
+}
+.rg-diff-summary-count {
+  color: var(--term-fg-muted);
+  font-size: 0.9em;
+}
+
+/* ── Commit list ─────────────────────────────────────────────── */
+
+.rg-commit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--term-rule);
+}
+
+.rg-commit {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--term-rule);
+  align-items: center;
+}
+.rg-commit:last-child {
+  border-bottom: none;
+}
+.rg-commit:hover {
+  background: var(--term-bg-cell);
+  color: var(--term-bg);
+}
+.rg-commit:hover a,
+.rg-commit:hover .rg-glyph,
+.rg-commit:hover .rg-author,
+.rg-commit:hover time {
+  color: var(--term-bg);
+}
+
+.rg-subject {
+  color: var(--term-fg);
+}
+
+.rg-author {
+  color: var(--term-fg-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  font-size: 0.9em;
+}
+
+.rg-commit time {
+  color: var(--term-fg-muted);
+  font-size: 0.9em;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ── Commit detail page ──────────────────────────────────────── */
+
+.rg-commit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--term-rule);
+}
+
+.rg-commit-subject {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--term-accent);
+}
+
+.rg-commit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: var(--term-fg-muted);
+  font-size: 0.95em;
+}
+
+.rg-commit-body {
+  margin: 0;
+}
+
+.rg-ref-head-badge {
+  display: inline-block;
+  background: var(--term-accent);
+  color: var(--term-bg);
+  padding: 0 0.35rem;
+  font-weight: 700;
+  font-size: 0.85em;
+  margin-left: 0.4rem;
+}
+
+/* ── Commit calendar ────────────────────────────────────────────── */
+
+.rg-cal {
+  margin: 1.25rem 0;
+  border: 1px solid var(--term-rule);
+  padding: 0.75rem;
+}
+
+.rg-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rg-cal-heading {
+  font-family: inherit; /* tui is monospace top to bottom */
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--term-accent);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.rg-cal-heading::before {
+  content: "▌";
+  color: var(--term-accent);
+  margin-right: 0.4em;
+}
+
+.rg-cal-legend {
+  font-size: 0.8rem;
+  color: var(--term-fg-dim);
+}
+
+.rg-cal-legend-cell {
+  border: 1px solid var(--term-rule);
+}
+
+.rg-cal-day-label,
+.rg-cal-month-label {
+  font-size: 9px;
+  fill: var(--term-fg-dim);
+}
+
+.rg-cal-cell {
+  stroke: var(--term-rule);
+  stroke-width: 0.5;
+}
+
+/* Tango-ish ANSI green ramp. Tier 0 picks up `term-bg-cell` so empty
+ * days still register as squares against the page background. */
+.rg-cal-l0 {
+  fill: var(--term-bg-cell);
+}
+.rg-cal-l1 {
+  fill: var(--ansi-green);
+  fill-opacity: 0.45;
+}
+.rg-cal-l2 {
+  fill: var(--ansi-green);
+  fill-opacity: 0.8;
+}
+.rg-cal-l3 {
+  fill: var(--ansi-bright-green);
+  fill-opacity: 0.85;
+}
+.rg-cal-l4 {
+  fill: var(--ansi-bright-green);
+}

@@ -1,0 +1,75 @@
+name: Bug report
+description: Something doesn't work the way it's documented to.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a report. Before you do, please check the [existing issues](https://github.com/level0x40/react-git/issues?q=is%3Aissue) to see if it's already been reported.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug. Include the exact error message if there is one.
+      placeholder: "When I run `react-git build .` against a bare repo, it crashes with `EPERM: operation not permitted`."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: |
+        The shortest path from a clean checkout of a public repo to the bug. Link to a repo or paste the commands.
+      placeholder: |
+        1. `git clone https://github.com/example/repo`
+        2. `cd repo`
+        3. `npx @level0x40/react-git build . --template primer`
+        4. The build aborts with the error above.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: The build to complete and write a static site to ./dist.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: react-git version
+      description: Output of `npx @level0x40/react-git --version` (or "main / commit-sha" for git installs).
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: Output of `node --version`.
+      placeholder: v22.5.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - Other (please describe in "Anything else")
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Logs, screenshots, related issues — anything that helps narrow down the cause.

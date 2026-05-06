@@ -1,0 +1,1549 @@
+/* react-server — visual coherence with the @lazarv/react-server docs site.
+ *
+ * Source: ~/Projects/rs-work6/docs (Tailwind-based; this template
+ * inlines equivalent vanilla CSS so it doesn't pull a Tailwind build
+ * into react-git). Tracks the docs' Tailwind design tokens by hex
+ * value pinned at authoring time — when the docs site rebrands, this
+ * template will fall behind until manually re-synced. That's a
+ * conscious cost vs. shipping a Tailwind dependency.
+ *
+ * Aesthetic the docs site is going for:
+ *
+ *   - Sans body, monospace code, generous line-height (1.75em on
+ *     prose paragraphs).
+ *   - Light mode: white → gray-200 vertical gradient bg, sticky white
+ *     header with drop shadow, indigo-500 links.
+ *   - Dark mode: zinc-800 → zinc-900 gradient bg, gray-300 fg, sticky
+ *     zinc-900 header, yellow-600 links.
+ *   - Custom list bullet (small horizontal bar) replaces the default
+ *     disc — a signature bit of the docs typography.
+ *   - Code blocks have rounded corners, a gray-500 border, and a
+ *     soft drop shadow. Inline `<code>` gets a gray-100 bg pill.
+ *   - Tables and blockquotes share a chunky 8px left border (blue
+ *     in light, yellow in dark).
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Tailwind palette tokens — pinned. */
+  --rs-white: #ffffff;
+  --rs-gray-50: #f9fafb;
+  --rs-gray-100: #f3f4f6;
+  --rs-gray-200: #e5e7eb;
+  --rs-gray-300: #d1d5db;
+  --rs-gray-400: #9ca3af;
+  --rs-gray-500: #6b7280;
+  --rs-gray-600: #4b5563;
+  --rs-gray-700: #374151;
+  --rs-gray-800: #1f2937;
+  --rs-gray-900: #111827;
+
+  --rs-zinc-300: #d4d4d8;
+  --rs-zinc-700: #3f3f46;
+  --rs-zinc-800: #27272a;
+  --rs-zinc-900: #18181b;
+
+  --rs-indigo-400: #818cf8;
+  --rs-indigo-500: #6366f1;
+  --rs-indigo-600: #4f46e5;
+
+  --rs-yellow-500: #eab308;
+  --rs-yellow-600: #ca8a04;
+
+  --rs-blue-100: #dbeafe;
+  --rs-blue-300: #93c5fd;
+  --rs-blue-500: #3b82f6;
+
+  --rs-rose-400: #fb7185;
+  --rs-fuchsia-500: #d946ef;
+
+  --rs-red-500: #ef4444;
+  --rs-red-600: #dc2626;
+  --rs-green-500: #22c55e;
+  --rs-green-600: #16a34a;
+
+  /* Semantic — light mode defaults */
+  --bg: var(--rs-white);
+  --bg-page: linear-gradient(to bottom, var(--rs-white), var(--rs-gray-200));
+  --bg-elev: var(--rs-white);
+  --bg-subtle: var(--rs-gray-100);
+  --bg-code: var(--rs-gray-100);
+  --fg: var(--rs-gray-800);
+  --fg-muted: var(--rs-gray-500);
+  --fg-on-emph: var(--rs-white);
+  --border: var(--rs-gray-200);
+  --border-strong: var(--rs-gray-300);
+  --border-code: var(--rs-gray-500);
+  --link: var(--rs-indigo-500);
+  --accent: var(--rs-indigo-500);
+  --quote-bg: var(--rs-blue-100);
+  --quote-bd: var(--rs-blue-300);
+  --shadow: 0 20px 25px -5px rgba(107, 114, 128, 0.4), 0 8px 10px -6px rgba(107, 114, 128, 0.25);
+
+  /* Typography */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--rs-zinc-900);
+    --bg-page: linear-gradient(to bottom, var(--rs-zinc-800), var(--rs-zinc-900));
+    --bg-elev: var(--rs-zinc-900);
+    --bg-subtle: var(--rs-zinc-800);
+    --bg-code: var(--rs-gray-500);
+    --fg: var(--rs-gray-300);
+    --fg-muted: var(--rs-gray-400);
+    --fg-on-emph: var(--rs-zinc-900);
+    --border: var(--rs-gray-800);
+    --border-strong: var(--rs-gray-700);
+    --border-code: var(--rs-gray-500);
+    --link: var(--rs-yellow-600);
+    --accent: var(--rs-yellow-600);
+    --quote-bg: var(--rs-yellow-500);
+    --quote-bd: var(--rs-yellow-600);
+    --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Page background — paint the docs' vertical gradient on `html` so
+ * it propagates to the canvas and always fills the viewport
+ * regardless of body content height. The docs apply the gradient to
+ * `body` and rely on `body { min-height: 100vh }` to cover the
+ * viewport, but content shorter than the viewport (a near-empty diff
+ * page, a 404) leaves the html canvas showing through with a solid
+ * `var(--bg)` and the gradient disappears. Hoisting the gradient one
+ * level up — to the element that always paints the canvas — fixes
+ * that without changing the visual when the body is tall.
+ *
+ * Body stays a transparent flex column so the gradient shows through
+ * the whole stack. `min-height: 100vh` is kept so the layout still
+ * fills the viewport when content is short. */
+html {
+  background: var(--bg-page);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+/* Plain `<code>` is monospace text, nothing more. The grey pill chip
+ * (background, padding, border-radius, bold weight, dark color
+ * override) is opt-IN, applied only inside prose-adjacent contexts
+ * (`.rg-prose`, `.rg-static-notice`, `.rg-error`) where a `<code>`
+ * actually represents a literal code reference — env var name,
+ * function name, flag, etc. — and benefits from a framed chip.
+ *
+ * Chrome `<code>` (breadcrumb SHAs, blob raw-meta paths/SHAs, HUD
+ * branch hint, commit page metadata, diff-summary paths) reads as
+ * plain monospace text without a chip. Wrapping a SHA in `<code>`
+ * is just a typographic hint; it shouldn't paint a pill any more
+ * than wrapping it in `<span style="font-family:monospace">` would.
+ *
+ * The opt-in rule sits below in the prose section. */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+pre {
+  font-family: var(--font-mono);
+  margin: 0;
+  padding: 16px;
+  background: var(--bg-subtle);
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border: 1px solid var(--border-code);
+  box-shadow: var(--shadow);
+}
+pre code {
+  font-size: inherit;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* ── App shell ───────────────────────────────────────────────── */
+
+.rg-ambient,
+.rg-ambient-grid,
+.rg-ambient-scan,
+.rg-ambient-glow {
+  display: none;
+}
+
+.rg-app {
+  /* Full viewport width — no centered max-width column. The git
+   * browser holds wide tables (file trees, diff hunks, commit lists)
+   * that benefit from horizontal real estate, and the page gradient
+   * + flat section layout already provide enough rhythm without a
+   * narrow reading column. Modest side padding keeps content from
+   * crowding the viewport edge. */
+  width: 100%;
+  margin: 0;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+/* HUD = sticky header. Two stacked lines: small "@lazarv" + bigger
+ * project name; nav cluster center; status right. Mirrors how the
+ * docs site arranges brand → search → social. */
+.rg-hud {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  height: 56px;
+  padding: 0 16px;
+  margin: 0 -16px 16px;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
+}
+@media (prefers-color-scheme: dark) {
+  .rg-hud {
+    border-bottom-color: var(--rs-gray-800);
+    color: var(--rs-gray-300);
+  }
+}
+
+.rg-hud-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--fg);
+  text-decoration: none;
+}
+.rg-hud-brand:hover {
+  text-decoration: none;
+}
+
+/* React-server logo — the docs' signature mark. The empty
+ * `<span class="rg-hud-brand-mark" aria-hidden>` in `layout.jsx`
+ * is paint-only; the SVG is inlined as a CSS background-image so
+ * the template ships standalone without needing the host site to
+ * stage a public asset. The artwork is the canonical mark from
+ * `react-server.dev/react-server.svg`: the React atom (cyan
+ * #61dafb ellipses + dot) overlaid with the yellow #ffd22a
+ * lightning bolt, white-stroked for legibility on either bg. */
+.rg-hud-brand-mark {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 33.866666 33.866667'><g transform='matrix(1.4232434 0 0 1.4232434 16.915196 17.10368)'><g stroke='%2361dafb' stroke-width='1' fill='none'><ellipse rx='11' ry='4.2'/><ellipse rx='11' ry='4.2' transform='rotate(60)'/><ellipse rx='11' ry='4.2' transform='rotate(120)'/></g><ellipse fill='%2361dafb' rx='4.215796' ry='4.826261' cx='-0.031601399' cy='0.15913987'/></g><path fill='%23ffd22a' stroke='%23ffffff' stroke-width='0.4' stroke-linejoin='round' stroke-linecap='round' d='m 12.509642,30.690503 -0.05834,-0.05685 -7.23e-4,-0.0561 -7.23e-4,-0.05611 0.768979,-2.092476 0.768982,-2.092473 0.556751,-1.543372 0.556748,-1.543368 0.006,-0.120103 0.006,-0.120088 -1.470798,0.0062 -1.470797,0.0062 -0.06194,-0.0727 -0.06194,-0.0727 0.233074,-0.46889 0.233073,-0.468892 0.856189,-1.667244 0.85619,-1.667245 0.41769,-0.85935 0.417689,-0.859349 -0.02911,-0.04578 -0.02911,-0.04576 -1.464266,0.01887 -1.464263,0.01887 -0.09348,-0.0485 -0.09349,-0.0485 -0.0011,-0.08618 -0.0011,-0.08616 0.11036,-0.213586 0.110359,-0.213582 1.014121,-2.024324 1.014119,-2.024327 0.696804,-1.43016 0.696802,-1.4301581 0.701201,-1.4012125 0.701198,-1.4012124 2.501594,-0.044655 2.501597,-0.044655 0.03154,0.079108 0.03152,0.079108 -0.04589,0.1264481 -0.04587,0.1264636 -0.768293,1.3291372 -0.768291,1.3291355 -0.6677,1.1797846 -0.6677,1.179784 0.02576,0.06464 0.02576,0.06464 1.695367,-0.02185 1.695368,-0.02185 0.07639,0.07444 0.07639,0.07446 7.89e-4,0.06124 7.9e-4,0.06124 -0.249474,0.406592 -0.249474,0.40659 -0.614255,0.968038 -0.614255,0.968039 -1.187109,1.911536 -1.187107,1.91154 -0.06878,0.13724 -0.06879,0.13724 0.02683,0.06732 0.02683,0.06732 1.62427,-0.02093 1.624265,-0.02093 0.09295,0.06616 0.09294,0.06612 -0.04534,0.122827 -0.04534,0.122843 -1.34915,1.664026 -1.349152,1.664023 -0.8062,1.018519 -0.8062,1.018517 -0.670268,0.824742 -0.670264,0.824741 -1.724844,2.146499 -1.724842,2.146498 -0.05964,7.69e-4 -0.05966,7.69e-4 z'/></svg>");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* The "react-server" name is the prominent line. Pinned to the
+ * docs' signature gold (`--rs-yellow-600`, #ca8a04) in BOTH light
+ * and dark modes — same color the docs paint their accent in dark
+ * mode and the same hue carried through their lightning-bolt logo.
+ * Using a fixed gold here (rather than `var(--accent)`, which would
+ * track indigo→yellow with `prefers-color-scheme`) makes the brand
+ * mark + brand name reinforce the same yellow signature regardless
+ * of system mode. */
+.rg-hud-brand-name {
+  display: inline-block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--rs-yellow-600);
+}
+.rg-hud-brand:hover .rg-hud-brand-name {
+  color: var(--rs-yellow-500);
+}
+.rg-hud-brand-name::before {
+  content: "@lazarv";
+  display: block;
+  font-size: 0.5rem;
+  font-weight: 400;
+  margin-bottom: -2px;
+  color: inherit;
+  letter-spacing: 0.02em;
+}
+
+.rg-hud-brand-sha {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  text-decoration: none;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.rg-hud-brand-sha:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.rg-hud-nav {
+  display: inline-flex;
+  gap: 24px;
+  justify-self: center;
+}
+
+.rg-hud-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 4px 0;
+}
+.rg-hud-nav a:hover {
+  text-decoration: none;
+}
+/* The signature gradient indicator (rose → fuchsia → indigo)
+ * sweeping in from 0 width on hover. Lifted directly from the docs
+ * site's nav animation. */
+.rg-hud-nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(
+    to right,
+    var(--rs-rose-400),
+    var(--rs-fuchsia-500),
+    var(--rs-indigo-500)
+  );
+  transform: translateX(-50%);
+  transition: width 200ms;
+}
+.rg-hud-nav a:hover::after {
+  width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-hud-nav a::after {
+    transition: none;
+  }
+}
+
+.rg-hud-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+.rg-hud-status-mode {
+  font-weight: 600;
+  color: var(--accent);
+}
+.rg-hud-status-sep,
+.rg-hud-status-cursor {
+  display: none;
+}
+.rg-hud-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rs-green-500);
+}
+.rg-hud-status-label {
+  color: var(--fg-muted);
+}
+
+.rg-statusbar {
+  display: none;
+}
+
+/* ── Stage / pages ───────────────────────────────────────────── */
+
+.rg-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 32px;
+}
+
+.rg-overview,
+.rg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rg-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.rg-title {
+  margin: 0 0 14px;
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.rg-description {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--fg-muted);
+}
+
+.rg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 14px 0 0;
+}
+.rg-meta > div {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.rg-meta dt {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.rg-meta dd {
+  margin: 0;
+}
+
+.rg-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 16px 0 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Crumbs — a single horizontal line of mixed segment kinds:
+ *   <a>{project}</a> / <a>section</a> / <span class="rg-ref-name">main</span>
+ *   <a>{project}</a> / <span>commit</span> / <code class="rg-sha">{sha}</code>
+ *   <a>{project}</a> / <a>tree</a> / <a class="rg-ref-name">main</a> / <a>src</a> / <span class="rg-crumbs-leaf">leaf</span>
+ *
+ * Without unification, the row reads chaotically: links bold, refs in
+ * a smaller monospace, SHAs in a smaller monospace, plain words at
+ * body size — three different sizes and two families on one line.
+ *
+ * Normalize: the crumb container fixes a single font-size; every
+ * immediate child inherits it regardless of element type. Monospace
+ * children (refs, SHAs, raw `<code>`) keep their typewriter family
+ * but render at the crumb size, not their default `0.875em`. Links
+ * use weight 500 (medium) instead of 600 (bold) — bold reads as
+ * heading-level emphasis and overpowers the surrounding crumbs.
+ *
+ * `align-items: center` because the path-aware crumbs include a
+ * leaf with a FileIcon (`<span class="rg-crumbs-leaf"><svg/><span/>`)
+ * and baseline-aligning a flex row that mixes icons and text leaves
+ * the icons sitting low. */
+.rg-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--fg);
+  margin: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.rg-crumbs > * {
+  font-size: inherit;
+  line-height: inherit;
+}
+.rg-crumbs > a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+.rg-crumbs > a:hover {
+  text-decoration: underline;
+}
+.rg-crumbs > span[aria-hidden="true"] {
+  color: var(--fg-muted);
+}
+/* Monospace children render at the crumb size, in inherit weight.
+ * Color is intentionally not set here — it cascades naturally:
+ *   - `<a class="rg-ref-name">` matches `.rg-crumbs > a` and gets
+ *     the link color
+ *   - `<a><code>...</code></a>` inherits the anchor's color through
+ *     the standard `color: inherit` default
+ *   - bare `<span class="rg-ref-name">` and `<code class="rg-sha">`
+ *     inherit the crumb's body color
+ * Setting `color: inherit` here would tie-break in favor of this
+ * descendant selector and collapse the anchor link color to body. */
+.rg-crumbs code,
+.rg-crumbs .rg-ref-name,
+.rg-crumbs .rg-sha {
+  font-family: var(--font-mono);
+  font-size: inherit;
+  font-weight: inherit;
+}
+/* Ref name marker — same policy as `.rg-sha`. Refs (`main`,
+ * `feature/foo`, `v1.2.0`) are identifiers; the pill framing was
+ * fighting every link affordance on the refs/tags rows and crowding
+ * the breadcrumb. Keep just monospace + smaller font; let the
+ * surrounding context (anchor color in `<a>`, body color elsewhere)
+ * supply the visual treatment. */
+.rg-ref-name {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+.rg-crumbs-leaf {
+  color: var(--fg);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Errors / notices — match docs blockquote style */
+.rg-error {
+  padding: 16px;
+  margin: 0;
+  background: var(--rs-red-500);
+  color: var(--rs-white);
+  border-left: 8px solid var(--rs-red-600);
+  border-radius: 4px;
+}
+
+.rg-static-notice {
+  padding: 16px;
+  margin: 0;
+  background: var(--quote-bg);
+  border-left: 8px solid var(--quote-bd);
+  color: var(--rs-gray-800);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+}
+
+.rg-muted-inline {
+  color: var(--fg-muted);
+}
+.rg-arrow {
+  color: var(--fg-muted);
+}
+.rg-add {
+  color: var(--rs-green-600);
+  font-weight: 600;
+}
+.rg-rem {
+  color: var(--rs-red-600);
+  font-weight: 600;
+}
+
+/* SHA marker — no chip. SHAs are identifiers; the pill framing was
+ * fighting every link affordance in the chrome (commit-list rows,
+ * refs/tags chips, parent links, breadcrumb crumb, overview HEAD).
+ * Keep monospace + smaller font + the icon-aligned inline-flex
+ * layout (the SHA is rendered next to a commit-marker glyph in
+ * CommitList rows) and let the surrounding context (link color in
+ * `<a class="rg-sha">`, body color in plain `<code class="rg-sha">`)
+ * supply color and weight. */
+.rg-sha {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.rg-commit-link {
+  color: inherit;
+  text-decoration: none;
+}
+.rg-commit-link:hover {
+  color: var(--accent);
+}
+
+/* ── File browser ────────────────────────────────────────────── */
+
+/* No card framing on the file tree — content sits directly on the
+ * page gradient, separated only by the row dividers. The thead has a
+ * single divider below it; the rows below have hairline dividers
+ * between them. Hover row uses a faint tint for affordance. */
+.rg-tree {
+  /* Plain table, no border/radius/fill/shadow. */
+}
+.rg-tree thead {
+  border-bottom: 1px solid var(--border);
+}
+.rg-tree thead th {
+  padding: 10px 16px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+
+.rg-tree-row {
+  border-bottom: 1px solid var(--border);
+}
+.rg-tree-row:last-child {
+  border-bottom: none;
+}
+.rg-tree-row td {
+  padding: 8px 16px;
+}
+.rg-tree-row:hover {
+  background: var(--bg-subtle);
+}
+
+.rg-tree-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 500;
+}
+.rg-tree-name:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.rg-tree-up .rg-tree-name {
+  color: var(--fg-muted);
+}
+.rg-tree-submodule {
+  color: var(--fg-muted);
+}
+.rg-tree-static {
+  color: var(--fg-muted);
+}
+
+.rg-tree-size {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* ── Glyph (icon) ─────────────────────────────────────────────── */
+
+.rg-glyph {
+  flex: none;
+}
+
+/* ── Blob view ───────────────────────────────────────────────── */
+
+/* No card framing on the blob view — header, controls, and content
+ * flow on the page gradient. Borders only where they communicate
+ * structure (under header, between sections). */
+.rg-blob {
+  /* Plain column container, no border/radius/fill/shadow. */
+}
+
+.rg-blob-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rg-blob-path {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.rg-blob-path-text {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.rg-blob-meta {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.rg-blob-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rg-blob-content {
+  padding: 0;
+}
+.rg-blob-content-markdown {
+  padding: 16px 0;
+}
+.rg-blob-content-media {
+  padding: 32px;
+  text-align: center;
+}
+.rg-blob-content-media img,
+.rg-blob-content-media video,
+.rg-blob-content-media audio {
+  max-width: 100%;
+  border-radius: 8px;
+}
+.rg-blob-content-rawmeta {
+  padding: 24px 32px;
+}
+
+.rg-blob-rawmeta-line {
+  margin: 0 0 12px;
+  color: var(--fg-muted);
+}
+.rg-blob-rawmeta-label {
+  color: var(--fg);
+  font-weight: 600;
+}
+.rg-blob-rawmeta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+.rg-blob-rawmeta dt {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.rg-blob-rawmeta dd {
+  margin: 0;
+}
+
+.rg-blob-empty {
+  padding: 32px;
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.rg-blob-fallback {
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 16px;
+}
+
+/* Toggle controls — pill segmented control, accent-active */
+.rg-blob-view-toggle,
+.rg-diff-toggle {
+  display: inline-flex;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 0;
+}
+
+.rg-blob-view-btn,
+.rg-diff-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--fg-muted);
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+.rg-blob-view-btn:hover,
+.rg-diff-toggle-btn:hover {
+  color: var(--fg);
+}
+.rg-blob-view-btn.is-active,
+.rg-diff-toggle-btn.is-active {
+  background: var(--accent);
+  color: var(--fg-on-emph);
+  font-weight: 600;
+}
+
+/* ── Prose (rendered markdown) ───────────────────────────────── */
+/*
+ * Mirrors the docs site's article styling closely — h-rule before
+ * h2s, custom list bullet (small bar), gray-100 inline code, blue
+ * blockquote with chunky left border. Tables also get the
+ * blockquote styling (left border, blue bg) per docs' choice.
+ */
+
+.rg-prose {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--fg);
+}
+.rg-prose h1,
+.rg-prose h2,
+.rg-prose h3,
+.rg-prose h4,
+.rg-prose h5 {
+  font-weight: 600;
+  margin: 1rem 0 14px;
+  line-height: 1.25;
+}
+.rg-prose h1 {
+  font-size: 1.875rem;
+}
+.rg-prose h2 {
+  font-size: 1.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+.rg-prose h3 {
+  font-size: 1.125rem;
+}
+.rg-prose h4 {
+  font-size: 1rem;
+}
+.rg-prose h5 {
+  font-size: 0.875rem;
+}
+.rg-prose p {
+  font-size: 1rem;
+  margin: 0 0 16px;
+  line-height: 1.75;
+}
+
+/* The signature custom-bullet list — small horizontal bar in
+ * place of the default disc. Same shape used for nested lists. */
+.rg-prose ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 16px;
+}
+.rg-prose ul li {
+  padding-left: 0;
+  margin-bottom: 8px;
+}
+.rg-prose ul li::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  width: 0.25rem;
+  height: 2px;
+  margin-top: -1px;
+  margin-right: 0.5rem;
+  background: currentColor;
+}
+.rg-prose ul ul {
+  padding-left: 16px;
+  margin: 8px 0 0;
+}
+
+.rg-prose ol {
+  list-style: decimal;
+  list-style-position: inside;
+  padding-left: 0;
+  margin: 0 0 16px;
+}
+.rg-prose ol li {
+  padding-left: 0;
+  margin-bottom: 8px;
+}
+.rg-prose ol li::marker {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rg-prose a {
+  color: var(--accent);
+}
+.rg-prose a:hover {
+  text-decoration: underline;
+}
+
+.rg-prose blockquote {
+  margin: 0 0 16px;
+  padding: 16px;
+  background: var(--quote-bg);
+  border-left: 8px solid var(--quote-bd);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  color: var(--rs-gray-800);
+}
+/* Inline code pill — opt-in framing for inline `<code>` references.
+ * Applied only inside prose-adjacent contexts (markdown body, static
+ * notices, error banners) where a `<code>` represents a literal code
+ * reference (env var name, function name, flag) that benefits from
+ * the chip outline. Chrome `<code>` (SHAs, paths, breadcrumb crumbs)
+ * stays plain monospace — see the base `code` rule above. */
+.rg-prose code,
+.rg-static-notice code,
+.rg-error code {
+  background: var(--bg-code);
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 4px;
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  .rg-prose code,
+  .rg-static-notice code,
+  .rg-error code {
+    color: var(--rs-white);
+  }
+}
+/* Inside `.rg-error`, the surrounding banner already has a coloured
+ * background (`var(--rs-red-500)`) — the standard pill `var(--bg-code)`
+ * looks muddy on top. Fall back to a light translucent fill so the
+ * chip reads against the red. */
+.rg-error code {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--rs-white);
+}
+
+.rg-prose blockquote code {
+  background: var(--rs-gray-100);
+  color: var(--rs-gray-800);
+  white-space: nowrap;
+}
+
+.rg-prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+.rg-prose img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.rg-prose pre {
+  margin: 32px 0;
+}
+.rg-prose pre code {
+  background: transparent;
+  padding: 0;
+  font-weight: inherit;
+}
+
+.rg-prose table {
+  background: var(--quote-bg);
+  border-left: 8px solid var(--quote-bd);
+  margin: 0 0 16px;
+  padding: 16px;
+}
+.rg-prose table th,
+.rg-prose table td {
+  text-align: left;
+  border-right: 1px solid var(--quote-bd);
+  padding: 8px;
+  color: var(--rs-gray-800);
+}
+.rg-prose table th:last-child,
+.rg-prose table td:last-child {
+  border-right: none;
+}
+.rg-prose table tr {
+  border-bottom: 1px solid var(--quote-bd);
+}
+.rg-prose table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Shiki containers — let Shiki's theme paint its own bg via the
+ * inline `style="background:…"` it emits on `<pre class="shiki">`.
+ * Previously we forced `var(--bg-subtle)` here, which neutralised
+ * the github-light/github-dark-dimmed backgrounds and made code
+ * blocks read as page-tinted strips instead of distinct syntax
+ * panes. With Shiki's own bg restored:
+ *   - light: #ffffff (github-light)        — bright, distinct from
+ *     the gradient that goes white→gray-200, paired with the border
+ *     to keep the block clearly framed even at the top of the page
+ *   - dark:  #22272e (github-dark-dimmed)  — the Primer dimmed bg,
+ *     identical to what the docs' highlight.js theme paints. */
+.rg-shiki-host pre.shiki {
+  border: 1px solid var(--border-code);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin: 0;
+  font-size: 0.875rem;
+}
+/* In markdown prose contexts the pre needs vertical room from
+ * surrounding paragraphs; restore the 32px margins there. The
+ * blob view (which is the bare Shiki block as the entire page
+ * body, no surrounding prose) doesn't need them and was showing
+ * an awkward 32px gap between the file header and the first line
+ * of code. */
+.rg-prose .rg-shiki-host pre.shiki,
+.rg-prose pre.shiki {
+  margin: 32px 0;
+}
+
+/* Multi-chunk Shiki blocks. BlobView splits files >200 lines into N
+ * Suspense-wrapped chunks, each rendering as its own `<pre class="shiki">`
+ * inside a `<div>` wrapper child of `.rg-shiki-host` (one div per
+ * Suspense boundary, one pre per chunk). To make the stack read as
+ * ONE continuous code block instead of N stacked framed boxes:
+ *
+ *   - chunks 1..N-1 drop top border / top-radius / top-margin so
+ *     they slot directly under the previous chunk
+ *   - chunks 0..N-2 drop bottom border / bottom-radius / bottom-margin
+ *     so they slot directly above the next chunk; also drop
+ *     `box-shadow` so only the FINAL chunk's shadow paints, dropping
+ *     cleanly below the merged stack instead of N overlapping
+ *     shadows banding through the column
+ *
+ * Single-chunk files (≤200 lines) match neither rule and keep their
+ * full frame — no behaviour change for the typical case. */
+.rg-shiki-host > div:not(:first-child) > pre.shiki {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.rg-shiki-host > div:not(:last-child) > pre.shiki {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  box-shadow: none;
+}
+
+/* Shiki dual-theme color swap — Shiki 4.x emits both themes' colors
+ * on every span (`style="color:<light>; --shiki-dark:<dark>"`) and
+ * the default render uses LIGHT theme tokens. Without the swap,
+ * dark-mode users would see github-light's dark token colors on
+ * react-server's dark page bg. Promote the `--shiki-dark` variables
+ * (color, bg, font-style, font-weight, text-decoration) to active
+ * properties when `prefers-color-scheme: dark`. */
+@media (prefers-color-scheme: dark) {
+  .rg-shiki-host pre.shiki,
+  .rg-shiki-host pre.shiki span,
+  .rg-shiki-line,
+  .rg-shiki-line span {
+    color: var(--shiki-dark) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+  /* Swap `<pre>` bg too so the github-dark-dimmed bg (#22272e) paints
+   * the code panel. Don't swap span bg here: diff rows carry their
+   * own add/remove tint via `.rg-line-add` / `.rg-line-remove`, which
+   * we don't want overwritten. */
+  .rg-shiki-host pre.shiki {
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+.rg-shiki-line {
+  font-family: var(--font-mono);
+  font-size: inherit;
+}
+
+/* Diff lines — DiffView emits each Shiki-highlighted line as a bare
+ * `<code class="rg-shiki-line">` inside a `<td>` (no `<pre>` wrapper),
+ * so the base `code` pill styling applies and turns every line into a
+ * grey chip. Strip the inline-code pill on any `<code>` that lives in
+ * a diff cell or carries `rg-shiki-line`, regardless of whether the
+ * line was highlightable (the unhighlighted fallback also uses bare
+ * `<code>`). The selector reaches both the inline and split diff
+ * tables via their respective text-cell classes. */
+.rg-line-text code,
+.rg-split-cell code,
+code.rg-shiki-line {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-weight: inherit;
+}
+
+/* ── Diff view ───────────────────────────────────────────────── */
+
+.rg-diff-files {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Diff entries ARE carded — each file's diff is a self-contained
+ * unit that benefits from a clear boundary, especially when several
+ * diffs stack on a commit page. The header (file path + status
+ * badges + stats) sits in a `var(--bg-subtle)` strip at the top of
+ * the card; controls + hunks fill the rest. Other section blocks
+ * on the page (blob, tree, commit list) flow flat on the gradient,
+ * but the diff is the one place where containment matters. */
+.rg-diff {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elev);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+/* Header strip uses the card's own `bg-elev` fill (white / zinc-900),
+ * not `bg-subtle`. Reason: `bg-subtle` (gray-100 light / zinc-800
+ * dark) lives in the same tonal range as the page gradient
+ * (white→gray-200 / zinc-800→zinc-900) and reads as page background
+ * regardless of where on the card it sits. The card boundary and the
+ * `border-bottom` carry the visual separation between header and
+ * content; the strip itself just inherits the card fill. */
+.rg-diff-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.rg-diff-path {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.rg-diff-path-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+.rg-diff-path-link:hover {
+  text-decoration: underline;
+}
+.rg-diff-stats {
+  display: inline-flex;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.rg-file-badge {
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 2px 0;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+.rg-file-badge-added {
+  background: var(--rs-green-500);
+  color: var(--rs-white);
+}
+.rg-file-badge-deleted {
+  background: var(--rs-red-500);
+  color: var(--rs-white);
+}
+.rg-file-badge-modified {
+  background: var(--rs-yellow-500);
+  color: var(--rs-zinc-900);
+}
+.rg-file-badge-renamed {
+  background: var(--rs-fuchsia-500);
+  color: var(--rs-white);
+}
+.rg-file-badge-copied {
+  background: var(--rs-blue-500);
+  color: var(--rs-white);
+}
+
+.rg-diff-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rg-hunks {
+  padding: 0;
+}
+.rg-hunk {
+  border-top: 1px solid var(--border);
+}
+.rg-hunk:first-child {
+  border-top: none;
+}
+
+.rg-hunk-header {
+  color: var(--fg-muted);
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.rg-hunk-range {
+  font-weight: 600;
+  color: var(--accent);
+}
+.rg-hunk-context {
+  margin-left: 16px;
+}
+
+.rg-hunk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.rg-hunk-table td {
+  padding: 0 8px;
+  vertical-align: top;
+}
+
+.rg-ln {
+  text-align: right;
+  width: 50px;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--fg-muted);
+  border-right: 1px solid var(--border);
+}
+
+.rg-line-marker {
+  width: 16px;
+  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--fg-muted);
+}
+
+.rg-line-text {
+  white-space: pre;
+}
+
+.rg-line-add {
+  background: rgba(34, 197, 94, 0.12);
+}
+.rg-line-add .rg-line-marker,
+.rg-line-add .rg-ln-new {
+  color: var(--rs-green-600);
+}
+
+.rg-line-remove {
+  background: rgba(239, 68, 68, 0.12);
+}
+.rg-line-remove .rg-line-marker,
+.rg-line-remove .rg-ln-old {
+  color: var(--rs-red-600);
+}
+
+.rg-line-context {
+  background: transparent;
+}
+
+.rg-hunk-split-table {
+  table-layout: fixed;
+}
+.rg-split-cell {
+  padding: 0 8px;
+  vertical-align: top;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rg-split-add {
+  background: rgba(34, 197, 94, 0.12);
+}
+.rg-split-remove {
+  background: rgba(239, 68, 68, 0.12);
+}
+.rg-split-context {
+  background: transparent;
+}
+.rg-split-empty {
+  background: var(--bg-subtle);
+  opacity: 0.4;
+}
+
+/* The summary is `<section class="rg-diff-summary"><header>…</header>
+ * <ul>…</ul></section>` — a sectioning container, NOT the list itself.
+ * Earlier rules treated `.rg-diff-summary` as the `<ul>` and left the
+ * real inner `<ul>` to inherit browser defaults (disc bullets, 40px
+ * left padding) and the `<header>` with no layout at all. Reset the
+ * `<ul>` and lay out the header explicitly. */
+.rg-diff-summary {
+  margin: 0;
+}
+.rg-diff-summary header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.rg-diff-summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rg-diff-summary li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.rg-diff-summary li:last-child {
+  border-bottom: none;
+}
+.rg-diff-summary li:hover {
+  background: var(--bg-subtle);
+}
+.rg-diff-summary a {
+  /* Inline flex so FileBadge + FileIcon + path align centered as a
+   * single row, with consistent gaps between siblings. Without it,
+   * the children fall back to inline baseline alignment and the
+   * status badge sits visually off from the icon and the path. */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  /* `min-width: 0` so a long path can shrink/truncate inside the
+   * flex row instead of pushing the stats column off the right edge. */
+  min-width: 0;
+  color: var(--accent);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+.rg-diff-summary-stats {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.rg-diff-summary-count {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+/* ── Commit list ─────────────────────────────────────────────── */
+
+/* No card framing on the commit list — rows flow on the page
+ * gradient, separated by row dividers. Hover row uses a faint
+ * tint for affordance. */
+.rg-commit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.rg-commit {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.rg-commit:last-child {
+  border-bottom: none;
+}
+.rg-commit:hover {
+  background: var(--bg-subtle);
+}
+
+.rg-subject {
+  color: var(--fg);
+}
+
+.rg-author {
+  color: var(--fg-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 0.875rem;
+}
+
+.rg-commit time {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Commit detail page ──────────────────────────────────────── */
+
+/* No card framing on the commit detail block — content flows on
+ * the page gradient with typography providing the structure. */
+.rg-commit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+}
+
+.rg-commit-subject {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.rg-commit-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+.rg-commit-body {
+  margin: 0;
+}
+
+.rg-ref-head-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--fg-on-emph);
+  padding: 2px 10px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
+/* ── Commit calendar ────────────────────────────────────────────── */
+
+.rg-cal {
+  margin: 1.5rem 0;
+}
+
+.rg-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rg-cal-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin: 0;
+}
+
+.rg-cal-legend {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+.rg-cal-legend-cell {
+  /* Stroke (not border) — these are SVG <rect> elements. A 1px stroke
+   * keeps the lowest tier (which is near the page bg) visible as a
+   * shape rather than dissolving. */
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.rg-cal-day-label,
+.rg-cal-month-label {
+  font-size: 9px;
+  fill: var(--fg-muted);
+}
+
+.rg-cal-cell {
+  stroke: var(--border);
+  stroke-width: 0.5;
+}
+
+/* Gold ramp matching the docs accent in both modes — yellow tracks
+ * with the brand mark in the HUD, so the calendar reads as part of
+ * the same visual system rather than a transplanted GitHub widget.
+ *
+ * Tier 0 (no commits) is `--border` rather than `--bg-subtle` —
+ * `--bg-subtle` is too close to the page background (white →
+ * gray-200 gradient in light, zinc-900 in dark), and empty cells
+ * end up invisible. `--border` is one shade darker, so the grid
+ * reads as a coherent rectangle even on quiet days. The visible
+ * cell stroke (set above) provides the secondary contrast. */
+.rg-cal-l0 {
+  fill: var(--border);
+}
+.rg-cal-l1 {
+  fill: rgba(234, 179, 8, 0.25); /* rs-yellow-500 / 25% */
+}
+.rg-cal-l2 {
+  fill: rgba(234, 179, 8, 0.5);
+}
+.rg-cal-l3 {
+  fill: rgba(202, 138, 4, 0.85); /* rs-yellow-600 */
+}
+.rg-cal-l4 {
+  fill: var(--rs-yellow-600);
+}
+
+@media (prefers-color-scheme: dark) {
+  .rg-cal-l0 {
+    fill: var(--border);
+  }
+  .rg-cal-l1 {
+    fill: rgba(202, 138, 4, 0.2);
+  }
+  .rg-cal-l2 {
+    fill: rgba(202, 138, 4, 0.5);
+  }
+  .rg-cal-l3 {
+    fill: rgba(234, 179, 8, 0.8);
+  }
+  .rg-cal-l4 {
+    fill: var(--rs-yellow-500);
+  }
+}

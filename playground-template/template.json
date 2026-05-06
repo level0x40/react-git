@@ -1,0 +1,6 @@
+{
+  "name": "wrapper-demo",
+  "label": "Wrapper Demo",
+  "description": "Path-based custom template. Ships ONLY a FileIcon JSX override that imports the package's built-in FileIcon via the `@level0x40/react-git/impl/components/FileIcon.jsx` package export and wraps it — proving custom templates can compose with original components instead of replacing them outright. No `src/styles/main.css` is shipped; the template-plugin's resolution falls through to the built-in `default` template's stylesheet, so the visual is the standard default theme with one extra signal: every FileIcon site renders the original SVG inside a magenta dashed outline with a `kind=…` tooltip.",
+  "version": "0.0.0"
+}

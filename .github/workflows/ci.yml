@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Strip default permissions; jobs request what they need explicitly.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint + format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      # `--frozen-lockfile` will fail the build if pnpm-lock.yaml drifts
+      # from the resolution of declared deps. That's the contract —
+      # every PR must come with a lockfile that satisfies its
+      # package.json changes; we don't accept silent dep updates from CI.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # oxlint is the lint gate — fast, Rust-based, no per-rule config
+      # by default. Catches dead imports, unused vars, suspect JSX,
+      # missing keys, etc. without the eslint config-soup. Configure
+      # via .oxlintrc.json if rule overrides are needed.
+      - name: Lint
+        run: pnpm lint
+
+      # oxfmt is the formatting gate. `--check` exits non-zero if any
+      # file would be rewritten — that's what we want CI to enforce.
+      # Run `pnpm format` locally to auto-fix.
+      - name: Format check
+        run: pnpm format:check
+
+  changeset-status:
+    name: Changeset present
+    runs-on: ubuntu-latest
+    # Only on PRs — main branch pushes don't need this gate.
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `changeset status --since` exits 0 if the PR has a changeset OR
+      # if no changesets are needed (only ignored packages changed).
+      # Exits non-zero otherwise. We let it fail loud — adds a CI gate
+      # on "did you add a changeset?" without commenting on the PR.
+      - name: Verify changeset
+        run: pnpm changeset status --since=origin/${{ github.base_ref }}

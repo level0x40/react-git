@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://react-git.level0x40.com
+    about: The published docs cover usage, templates, the data layer, and deployment.
+  - name: Discussions
+    url: https://github.com/level0x40/react-git/discussions
+    about: For open-ended questions, ideas, or showcase posts. Bug reports and feature requests should still go through the issue forms.

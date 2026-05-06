@@ -1,0 +1,6 @@
+{
+  "name": "tui",
+  "label": "TUI",
+  "description": "Terminal-UI aesthetic — tig/lazygit/k9s in the browser. Monospace everywhere, ANSI 16-color palette, ASCII box-drawing for tree views, simulated cursor block at heading ends, no anti-aliasing on glyphs. Doubles down on the meta-joke that you're viewing git source in the browser through something that looks like the CLI you'd reach for otherwise.",
+  "version": "0.0.0"
+}

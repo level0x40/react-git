@@ -1,0 +1,6 @@
+{
+  "name": "primer",
+  "label": "Primer",
+  "description": "Evocative of GitHub's design language (named after their Primer design system). Octicon-style monochrome icons, Primer color tokens, sticky breadcrumb header, dense file rows. Aimed at OSS maintainers who want their repo viewer to feel like home for contributors.",
+  "version": "0.0.0"
+}
